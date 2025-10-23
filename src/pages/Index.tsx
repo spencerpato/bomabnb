@@ -3,8 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { PropertyCard } from "@/components/PropertyCard";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, MapPin, DollarSign, Star } from "lucide-react";
+import { MapPin, DollarSign, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -48,11 +47,20 @@ const Index = () => {
     }
   };
 
+  useEffect(() => {
+    handleSearch();
+  }, [searchLocation]);
+
   const handleSearch = () => {
-    if (searchLocation) {
-      const filtered = properties.filter((p) =>
-        p.location.toLowerCase().includes(searchLocation.toLowerCase())
-      );
+    if (searchLocation.trim()) {
+      const filtered = properties.filter((p) => {
+        const search = searchLocation.toLowerCase();
+        return (
+          p.location.toLowerCase().includes(search) ||
+          p.property_name.toLowerCase().includes(search) ||
+          p.amenities.some((a) => a.toLowerCase().includes(search))
+        );
+      });
       setProperties(filtered);
     } else {
       fetchProperties();
@@ -79,25 +87,14 @@ const Index = () => {
 
           {/* Search Bar */}
           <div className="bg-card p-6 rounded-2xl shadow-lg max-w-3xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-                <Input
-                  placeholder="Search by location (e.g., Nairobi, Mombasa, Kisumu)"
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="pl-10 h-12 border-border bg-background"
-                />
-              </div>
-              <Button
-                onClick={handleSearch}
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 h-12"
-              >
-                <Search className="mr-2 h-5 w-5" />
-                Search
-              </Button>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Input
+                placeholder="Search by location, property name, or amenities..."
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                className="pl-10 h-14 text-base border-border bg-background"
+              />
             </div>
           </div>
         </div>

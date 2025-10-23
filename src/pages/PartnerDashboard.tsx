@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Home, Calendar, User as UserIcon } from "lucide-react";
+import { Plus, Home, Calendar, User as UserIcon, Settings, Star } from "lucide-react";
 
 interface Partner {
   id: string;
@@ -23,6 +23,21 @@ interface Property {
   price_per_night: number;
   is_active: boolean;
 }
+
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  if (hour < 21) return "Good evening";
+  return "Good night";
+};
+
+const PartnerDashboard = () => {
+  const navigate = useNavigate();
+  const [partner, setPartner] = useState<Partner | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [userName, setUserName] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
@@ -40,6 +55,17 @@ const PartnerDashboard = () => {
       if (!user) {
         navigate("/auth");
         return;
+      }
+
+      // Get user profile
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      if (profileData) {
+        setUserName(profileData.full_name);
       }
 
       // Check if user is a partner
@@ -135,10 +161,45 @@ const PartnerDashboard = () => {
       <div className="flex-1 px-4 py-12">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-8">
-            <h1 className="font-heading font-bold text-4xl mb-2">Partner Dashboard</h1>
+            <h1 className="font-heading font-bold text-4xl mb-2">
+              {getGreeting()}, {userName || "Partner"}!
+            </h1>
             <p className="text-muted-foreground">
-              Welcome back! Manage your properties and bookings.
+              Welcome back to your dashboard. Manage your properties and bookings here.
             </p>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <Button
+              onClick={() => navigate("/add-property")}
+              className="h-auto py-6 flex flex-col items-center gap-2 bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-6 w-6" />
+              <span>Add Property</span>
+            </Button>
+            <Button
+              onClick={() => navigate("/partner-profile")}
+              variant="outline"
+              className="h-auto py-6 flex flex-col items-center gap-2"
+            >
+              <Settings className="h-6 w-6" />
+              <span>My Profile</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto py-6 flex flex-col items-center gap-2"
+            >
+              <Star className="h-6 w-6" />
+              <span>Feature Request</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-auto py-6 flex flex-col items-center gap-2"
+            >
+              <Calendar className="h-6 w-6" />
+              <span>View Bookings</span>
+            </Button>
           </div>
 
           {/* Stats Cards */}

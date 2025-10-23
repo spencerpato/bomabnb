@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Heart } from "lucide-react";
+import { Heart, MessageCircle, Phone, Mail } from "lucide-react";
 import logo from "@/assets/bomabnb-logo.png";
 
 export const Footer = () => {
@@ -54,20 +54,20 @@ export const Footer = () => {
           <div>
             <h3 className="font-heading font-bold mb-4">Contact Info</h3>
             <p className="text-sm text-secondary-foreground/80 mb-2">
-              Email: info@bomabnb.com
+              Email: patomaich611@gmail.com
             </p>
             <p className="text-sm text-secondary-foreground/80 mb-4">
-              Phone: +254 700 000 000
+              Phone: +254 703 998 717
             </p>
             <div className="flex gap-3">
-              <a href="#" className="hover:text-primary transition-colors">
-                <Facebook className="h-5 w-5" />
+              <a href="https://wa.me/254703998717" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" title="WhatsApp">
+                <MessageCircle className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
-                <Twitter className="h-5 w-5" />
+              <a href="tel:+254703998717" className="hover:text-primary transition-colors" title="Call">
+                <Phone className="h-5 w-5" />
               </a>
-              <a href="#" className="hover:text-primary transition-colors">
-                <Instagram className="h-5 w-5" />
+              <a href="mailto:patomaich611@gmail.com" className="hover:text-primary transition-colors" title="Email">
+                <Mail className="h-5 w-5" />
               </a>
             </div>
           </div>
