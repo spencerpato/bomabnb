@@ -39,12 +39,6 @@ const PartnerDashboard = () => {
   const [userName, setUserName] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
-const PartnerDashboard = () => {
-  const navigate = useNavigate();
-  const [partner, setPartner] = useState<Partner | null>(null);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     checkAuth();
   }, []);
