@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const heroSlides = [
   {
@@ -26,6 +27,7 @@ const heroSlides = [
 ];
 
 export const HeroCarousel = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -57,15 +59,34 @@ export const HeroCarousel = () => {
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: `url(${slide.image})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
           </div>
-          <div className="relative h-full flex flex-col justify-center px-8 md:px-16 text-white">
-            <h2 className="font-heading font-bold text-4xl md:text-6xl mb-4 animate-fade-in">
+          <div className="relative h-full flex flex-col justify-center items-center px-4 md:px-16 text-white text-center">
+            <h2 className="font-heading font-bold text-3xl md:text-5xl lg:text-6xl mb-3 md:mb-4 animate-fade-in max-w-4xl">
               {slide.caption}
             </h2>
-            <p className="text-xl md:text-2xl text-white/90 max-w-2xl animate-fade-in animation-delay-200">
+            <p className="text-lg md:text-xl lg:text-2xl text-white/90 mb-6 md:mb-8 animate-fade-in animation-delay-200 max-w-2xl">
               {slide.subtitle}
             </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full max-w-md backdrop-blur-sm bg-black/20 p-4 md:p-6 rounded-2xl shadow-2xl">
+              <Button
+                data-testid="button-partner-with-us"
+                onClick={() => navigate("/partner-register")}
+                className="h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
+                style={{ backgroundColor: "#D4A017", color: "white" }}
+              >
+                🏡 Partner With Us
+              </Button>
+              <Button
+                data-testid="button-partner-login"
+                onClick={() => navigate("/auth")}
+                variant="outline"
+                className="h-12 md:h-14 text-base md:text-lg font-semibold border-2 border-white text-white bg-transparent hover:bg-white/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
+              >
+                🔑 Partner Login
+              </Button>
+            </div>
           </div>
         </div>
       ))}

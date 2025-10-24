@@ -124,34 +124,37 @@ export const Footer = () => {
                 </p>
               )}
             </div>
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-4 md:gap-3 mt-6 md:mt-4 justify-center md:justify-start">
               {settings?.whatsapp_number && (
                 <a 
+                  data-testid="link-whatsapp"
                   href={`https://wa.me/${settings.whatsapp_number.replace(/\D/g, "")}`} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="hover:text-primary transition-colors" 
+                  className="w-14 h-14 md:w-12 md:h-12 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg" 
                   title="WhatsApp"
                 >
-                  <MessageCircle className="h-5 w-5" />
+                  <MessageCircle className="h-7 w-7 md:h-6 md:w-6 text-white" />
                 </a>
               )}
               {settings?.contact_phone && (
                 <a 
+                  data-testid="link-call"
                   href={`tel:${settings.contact_phone}`} 
-                  className="hover:text-primary transition-colors" 
+                  className="w-14 h-14 md:w-12 md:h-12 rounded-full bg-blue-500 hover:bg-blue-600 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg" 
                   title="Call"
                 >
-                  <Phone className="h-5 w-5" />
+                  <Phone className="h-7 w-7 md:h-6 md:w-6 text-white" />
                 </a>
               )}
               {settings?.contact_email && (
                 <a 
+                  data-testid="link-email"
                   href={`mailto:${settings.contact_email}`} 
-                  className="hover:text-primary transition-colors" 
+                  className="w-14 h-14 md:w-12 md:h-12 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg" 
                   title="Email"
                 >
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-7 w-7 md:h-6 md:w-6 text-white" />
                 </a>
               )}
             </div>

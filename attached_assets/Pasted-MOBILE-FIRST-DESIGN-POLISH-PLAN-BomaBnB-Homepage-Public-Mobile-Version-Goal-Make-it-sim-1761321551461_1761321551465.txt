@@ -1,0 +1,112 @@
+MOBILE-FIRST DESIGN POLISH PLAN (BomaBnB)
+🏠 Homepage (Public) — Mobile Version
+🎯 Goal:
+Make it simple, modern, and immediately clear what to do.
+
+1️⃣ Hero / Carousel Section
+The background carousel (sample BnB interiors) still plays full width with soft fade transitions.
+Overlay two main CTA buttons on top of it:
+🏡 Partner With Us (Primary button, Gold background #D4A017, white text)
+🔑 Partner Login (Secondary, bordered button, transparent with white border)
+Position:
+Centered vertically within the carousel, stacked vertically.
+Add a light blur behind buttons for readability.
+Slight shadow for elevation.
+Example layout (visually):
+[Carousel image plays here]
+   [ Your home away from home ]
+   [ Partner With Us ] [ Partner Login ]
+
+Bonus:
+Below the carousel, display a short intro line:
+“Explore verified Kenyan Airbnbs hosted by locals — comfort meets culture.”
+
+2️⃣ Search & Filter
+Move the search bar just below the carousel.
+Rounded edges, full width, simple placeholder:
+“Search by location, name, or price range...”
+Auto-filters with every character typed (real-time).
+Optionally, include a small filter icon to open advanced filters (Price, Type, Rating).
+
+3️⃣ Listings Section
+Display one listing per row (cleaner and easier to interact with).
+Include a ‘Featured’ ribbon tag for paid top listings.
+Add swipe gesture for image gallery preview on mobile.
+
+4️⃣ Footer
+Large, circular clickable contact icons (WhatsApp, Call, Email).
+Small caption below:
+“Made with ❤️ by Patrick” (❤️ is still the superadmin link).
+
+🧑‍💼 Partner Dashboard (Mobile View)
+Keep the sidebar hidden behind a hamburger icon (top-left corner).
+When opened, it slides over the screen.
+Sidebar shows:
+Partner profile pic
+Name + Business Name
+Quick links:
+Dashboard Overview
+My Properties
+Add Property
+Bookings
+Profile
+Feature My Property
+Logout
+Each icon has a small symbol for mobile clarity (🏠, 🏡, 📅, 👤, ⭐, 🚪).
+Dashboard Overview (first page after login):
+Greeting: “Good Afternoon, [Name] 🌞”
+Notifications (slide-in or swipeable).
+Cards:
+Total Properties
+Total Bookings
+Featured Listings
+Account Status (Active / Pending)
+Action Buttons (for mobile):
+Floating Action Button (FAB) at bottom-right: ➕ “Add Property”
+“View All” buttons below small summaries.
+
+🧑‍💻 Superadmin Dashboard (Mobile + Desktop)
+Role-Based Controls
+When viewing a partner or a listing:
+Partner Management Buttons:
+✅ Approve / Activate Partner
+🚫 Suspend Partner
+❌ Delete Partner
+Property Management Buttons:
+🔼 Feature Property
+❌ Delete Listing
+⚙️ Edit (optional, if needed)
+Each of these should appear as colored buttons or dropdown actions beside the record.
+Confirmation modals (Yes/No) appear before irreversible actions like Delete or Suspend.
+Dashboard Overview
+Cards showing:
+Total Partners
+Pending Approvals
+Active Listings
+Featured Listings
+Reported Bugs / Maintenance Requests
+Maintenance Page
+Toggle switches for:
+Enable/Disable Partner Registration
+Enable/Disable Booking Form
+Enable/Disable Featured Promotions
+Logs section:
+Shows date, time, user, and action (e.g., Patrick approved Lakeview Apartments by John Doe).
+
+📲 Responsive Behavior Recap
+Screen SizeAdjustments
+Mobile (<768px)
+1 listing per row, sidebar collapses, buttons stack, notifications slide-down
+Tablet (≥768px)
+2 listings per row, sidebar collapsible, charts scale smaller
+Desktop (≥1024px)
+3–4 listings per row, persistent sidebar, full analytics and data tables
+
+🌟 Final Touch: User Experience
+All call-to-action buttons large enough for thumb tap (44px min height).
+Consistent use of Safari Gold (#D4A017) for main actions.
+Every page should load in <2s (cache assets smartly).
+Floating notifications slide up briefly for messages like:
+“Partner approved successfully ✅”
+“Property deleted ❌”
+“New booking received 📩”

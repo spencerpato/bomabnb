@@ -224,6 +224,13 @@ const Index = () => {
       <section className="px-2 sm:px-4 pt-4 sm:pt-8">
         <div className="container mx-auto">
           <HeroCarousel />
+          
+          {/* Tagline below carousel */}
+          <div className="text-center mt-6 md:mt-8 px-4">
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto font-medium">
+              Explore verified Kenyan Airbnbs hosted by locals — comfort meets culture.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -235,10 +242,11 @@ const Index = () => {
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
                 <Input
-                  placeholder="Search by location, property name, or amenities..."
+                  data-testid="input-search"
+                  placeholder="Search by location, name, or price range..."
                   value={searchLocation}
                   onChange={(e) => setSearchLocation(e.target.value)}
-                  className="pl-10 h-10 sm:h-12 text-sm sm:text-base border-border bg-background"
+                  className="pl-10 h-12 sm:h-14 text-sm sm:text-base border-border bg-background rounded-full"
                 />
               </div>
 
@@ -351,7 +359,7 @@ const Index = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredProperties.map((property) => (
                 <PropertyCard
                   key={property.id}
