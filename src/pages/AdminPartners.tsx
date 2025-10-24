@@ -64,6 +64,7 @@ const AdminPartners = () => {
   const [showProfileDialog, setShowProfileDialog] = useState(false);
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+  const [showReactivateDialog, setShowReactivateDialog] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -285,6 +286,47 @@ const AdminPartners = () => {
     }
   };
 
+  const handleReactivatePartner = async () => {
+    if (!selectedPartner) return;
+
+    try {
+      const { error } = await supabase
+        .from("partners")
+        .update({ status: "active", approved_at: new Date().toISOString() })
+        .eq("id", selectedPartner.id);
+
+      if (error) throw error;
+
+      // Get partner profile for notification
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", selectedPartner.user_id)
+        .single();
+
+      const partnerName = profileData?.full_name || "Partner";
+
+      // Create notification for the partner
+      await supabase
+        .from("partner_notifications")
+        .insert({
+          partner_id: selectedPartner.id,
+          type: "account_reactivated",
+          title: "✅ Account Reactivated!",
+          message: `Great news ${partnerName}! Your BomaBnB partner account has been reactivated. You can now access your dashboard and manage your properties again. Welcome back!`,
+          status: "unread"
+        });
+
+      toast.success("Partner reactivated successfully");
+      setShowReactivateDialog(false);
+      setSelectedPartner(null);
+      fetchData();
+    } catch (error) {
+      console.error("Error reactivating partner:", error);
+      toast.error("Failed to reactivate partner");
+    }
+  };
+
   const handleDeletePartner = async () => {
     if (!selectedPartner) return;
 
@@ -449,6 +491,20 @@ const AdminPartners = () => {
                               Suspend
                             </Button>
                           )}
+                          {(partner.status === "suspended" || partner.status === "rejected") && (
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => {
+                                setSelectedPartner(partner);
+                                setShowReactivateDialog(true);
+                              }}
+                              data-testid={`button-reactivate-${partner.id}`}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Reactivate
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="ghost"
@@ -548,6 +604,20 @@ const AdminPartners = () => {
                             >
                               <Ban className="h-4 w-4 mr-1" />
                               Suspend
+                            </Button>
+                          )}
+                          {(partner.status === "suspended" || partner.status === "rejected") && (
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => {
+                                setSelectedPartner(partner);
+                                setShowReactivateDialog(true);
+                              }}
+                              data-testid={`button-mobile-reactivate-${partner.id}`}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Reactivate
                             </Button>
                           )}
                           <Button
@@ -671,6 +741,28 @@ const AdminPartners = () => {
               data-testid="button-confirm-suspend"
             >
               Suspend Partner
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reactivate Confirmation Dialog */}
+      <AlertDialog open={showReactivateDialog} onOpenChange={setShowReactivateDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reactivate Partner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to reactivate this partner? They will regain full access to their dashboard and be able to manage their properties.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleReactivatePartner}
+              className="bg-green-600 hover:bg-green-700"
+              data-testid="button-confirm-reactivate"
+            >
+              Reactivate Partner
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
