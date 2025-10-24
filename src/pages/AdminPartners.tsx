@@ -62,6 +62,8 @@ const AdminPartners = () => {
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -359,50 +361,52 @@ const AdminPartners = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full hidden md:table">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-4 font-semibold">Partner Name</th>
+                    <th className="text-left p-4 font-semibold">Business Name</th>
                     <th className="text-left p-4 font-semibold">Email</th>
                     <th className="text-left p-4 font-semibold">Phone</th>
                     <th className="text-left p-4 font-semibold">Status</th>
-                    <th className="text-left p-4 font-semibold">Properties</th>
-                    <th className="text-left p-4 font-semibold">Registered On</th>
+                    <th className="text-left p-4 font-semibold">Joined On</th>
                     <th className="text-left p-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredPartners.map((partner) => (
-                    <tr key={partner.id} className="border-b hover:bg-muted/50">
+                    <tr key={partner.id} className="border-b hover:bg-muted/50" data-testid={`row-partner-${partner.id}`}>
                       <td className="p-4">
-                        <div>
-                          <p className="font-medium">{partner.profiles.full_name}</p>
-                          {partner.business_name && (
-                            <p className="text-sm text-muted-foreground">{partner.business_name}</p>
-                          )}
-                        </div>
+                        <p className="font-medium" data-testid={`text-partnername-${partner.id}`}>{partner.profiles.full_name}</p>
+                      </td>
+                      <td className="p-4">
+                        <p className="text-sm" data-testid={`text-businessname-${partner.id}`}>
+                          {partner.business_name || "N/A"}
+                        </p>
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <Mail className="h-4 w-4 text-muted-foreground" />
-                          {partner.profiles.email}
+                          <span data-testid={`text-email-${partner.id}`}>{partner.profiles.email}</span>
                         </div>
                       </td>
-                      <td className="p-4">{partner.profiles.phone_number || "N/A"}</td>
+                      <td className="p-4" data-testid={`text-phone-${partner.id}`}>{partner.profiles.phone_number || "N/A"}</td>
                       <td className="p-4">{getStatusBadge(partner.status)}</td>
-                      <td className="p-4">{partner.properties_count || 0}</td>
-                      <td className="p-4 text-sm">
+                      <td className="p-4 text-sm" data-testid={`text-joined-${partner.id}`}>
                         {new Date(partner.created_at).toLocaleDateString()}
                       </td>
                       <td className="p-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             onClick={() => {
                               setSelectedPartner(partner);
                               setShowProfileDialog(true);
                             }}
+                            title="View Profile"
+                            data-testid={`button-viewprofile-${partner.id}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -410,15 +414,21 @@ const AdminPartners = () => {
                             <>
                               <Button
                                 size="sm"
-                                onClick={() => handleApprovePartner(partner.id, partner.user_id)}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => {
+                                  setSelectedPartner(partner);
+                                  setShowApproveDialog(true);
+                                }}
+                                data-testid={`button-approve-${partner.id}`}
                               >
-                                <CheckCircle className="h-4 w-4 mr-1" />
+                                <UserCheck className="h-4 w-4 mr-1" />
                                 Approve
                               </Button>
                               <Button
                                 size="sm"
-                                variant="destructive"
+                                className="bg-red-600 hover:bg-red-700 text-white"
                                 onClick={() => handleRejectPartner(partner.id)}
+                                data-testid={`button-reject-${partner.id}`}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
                                 Reject
@@ -428,8 +438,12 @@ const AdminPartners = () => {
                           {partner.status === "active" && (
                             <Button
                               size="sm"
-                              variant="outline"
-                              onClick={() => handleSuspendPartner(partner.id)}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                              onClick={() => {
+                                setSelectedPartner(partner);
+                                setShowSuspendDialog(true);
+                              }}
+                              data-testid={`button-suspend-${partner.id}`}
                             >
                               <Ban className="h-4 w-4 mr-1" />
                               Suspend
@@ -438,12 +452,15 @@ const AdminPartners = () => {
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             onClick={() => {
                               setSelectedPartner(partner);
                               setShowDeleteDialog(true);
                             }}
+                            title="Delete Partner"
+                            data-testid={`button-delete-${partner.id}`}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>
@@ -451,6 +468,107 @@ const AdminPartners = () => {
                   ))}
                 </tbody>
               </table>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {filteredPartners.map((partner) => (
+                  <Card key={partner.id} data-testid={`card-partner-${partner.id}`}>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-semibold text-lg">{partner.profiles.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{partner.business_name || "No business name"}</p>
+                          </div>
+                          {getStatusBadge(partner.status)}
+                        </div>
+                        
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span>{partner.profiles.email}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Phone: </span>
+                            {partner.profiles.phone_number || "N/A"}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Joined: </span>
+                            {new Date(partner.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => {
+                              setSelectedPartner(partner);
+                              setShowProfileDialog(true);
+                            }}
+                            data-testid={`button-mobile-viewprofile-${partner.id}`}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          {partner.status === "pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                                onClick={() => {
+                                  setSelectedPartner(partner);
+                                  setShowApproveDialog(true);
+                                }}
+                                data-testid={`button-mobile-approve-${partner.id}`}
+                              >
+                                <UserCheck className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                                onClick={() => handleRejectPartner(partner.id)}
+                                data-testid={`button-mobile-reject-${partner.id}`}
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {partner.status === "active" && (
+                            <Button
+                              size="sm"
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                              onClick={() => {
+                                setSelectedPartner(partner);
+                                setShowSuspendDialog(true);
+                              }}
+                              data-testid={`button-mobile-suspend-${partner.id}`}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              Suspend
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => {
+                              setSelectedPartner(partner);
+                              setShowDeleteDialog(true);
+                            }}
+                            data-testid={`button-mobile-delete-${partner.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
@@ -502,20 +620,75 @@ const AdminPartners = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Approve Confirmation Dialog */}
+      <AlertDialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Approve Partner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to approve this partner? They will gain access to the partner dashboard and be able to list properties.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (selectedPartner) {
+                  handleApprovePartner(selectedPartner.id, selectedPartner.user_id);
+                  setShowApproveDialog(false);
+                  setSelectedPartner(null);
+                }
+              }} 
+              className="bg-green-600 hover:bg-green-700"
+              data-testid="button-confirm-approve"
+            >
+              Approve Partner
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Suspend Confirmation Dialog */}
+      <AlertDialog open={showSuspendDialog} onOpenChange={setShowSuspendDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Suspend Partner?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Suspend this partner temporarily? They will lose access to their dashboard but their data will remain intact. You can reactivate them later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (selectedPartner) {
+                  handleSuspendPartner(selectedPartner.id);
+                  setShowSuspendDialog(false);
+                  setSelectedPartner(null);
+                }
+              }} 
+              className="bg-red-600 hover:bg-red-700"
+              data-testid="button-confirm-suspend"
+            >
+              Suspend Partner
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Partner?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the partner account and all associated data. This action
-              cannot be undone.
+              Delete this partner and all their listings? This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeletePartner} className="bg-destructive hover:bg-destructive/90">
-              Delete
+            <AlertDialogAction onClick={handleDeletePartner} className="bg-destructive hover:bg-destructive/90" data-testid="button-confirm-delete">
+              Delete Partner
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

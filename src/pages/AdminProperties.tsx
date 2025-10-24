@@ -70,6 +70,7 @@ const AdminProperties = () => {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showFeatureDialog, setShowFeatureDialog] = useState(false);
   const [showExtendDialog, setShowExtendDialog] = useState(false);
+  const [showRemoveFeatureDialog, setShowRemoveFeatureDialog] = useState(false);
   const [featureDuration, setFeatureDuration] = useState("7");
 
   useEffect(() => {
@@ -260,16 +261,12 @@ const AdminProperties = () => {
     try {
       const { error } = await supabase
         .from("properties")
-        .update({
-          is_featured: false,
-          feature_start_date: null,
-          feature_end_date: null
-        })
+        .update({ is_featured: false })
         .eq("id", propertyId);
 
       if (error) throw error;
 
-      toast.success("Featured status removed");
+      toast.success("Property successfully unfeatured ✅");
       fetchData();
     } catch (error) {
       console.error("Error removing feature:", error);
@@ -359,50 +356,44 @@ const AdminProperties = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full hidden md:table">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-4 font-semibold">Property Name</th>
-                    <th className="text-left p-4 font-semibold">Owner</th>
+                    <th className="text-left p-4 font-semibold">Owner (Partner)</th>
                     <th className="text-left p-4 font-semibold">Location</th>
-                    <th className="text-left p-4 font-semibold">Price</th>
                     <th className="text-left p-4 font-semibold">Status</th>
                     <th className="text-left p-4 font-semibold">Featured</th>
+                    <th className="text-left p-4 font-semibold">Bookings</th>
                     <th className="text-left p-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredProperties.map((property) => (
-                    <tr key={property.id} className="border-b hover:bg-muted/50">
+                    <tr key={property.id} className="border-b hover:bg-muted/50" data-testid={`row-property-${property.id}`}>
                       <td className="p-4">
                         <div>
-                          <p className="font-medium">{property.property_name}</p>
+                          <p className="font-medium" data-testid={`text-propertyname-${property.id}`}>{property.property_name}</p>
                           <p className="text-sm text-muted-foreground capitalize">{property.property_type}</p>
                         </div>
                       </td>
-                      <td className="p-4">{property.partners?.profiles?.full_name || "Unknown"}</td>
+                      <td className="p-4" data-testid={`text-owner-${property.id}`}>{property.partners?.profiles?.full_name || "Unknown"}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          {property.location}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-muted-foreground" />
-                          KES {property.price_per_night.toLocaleString()}
+                          <span data-testid={`text-location-${property.id}`}>{property.location}</span>
                         </div>
                       </td>
                       <td className="p-4">
                         {property.is_active ? (
-                          <Badge variant="default">Active</Badge>
+                          <Badge variant="default">✓ Active</Badge>
                         ) : (
                           <Badge variant="secondary">Inactive</Badge>
                         )}
                       </td>
                       <td className="p-4">
                         {property.is_featured ? (
-                          <Badge variant="default">
+                          <Badge className="bg-[#D4A017] hover:bg-[#D4A017]/90">
                             <Star className="h-3 w-3 mr-1 fill-current" />
                             Featured
                           </Badge>
@@ -410,24 +401,29 @@ const AdminProperties = () => {
                           <Badge variant="outline">Not Featured</Badge>
                         )}
                       </td>
+                      <td className="p-4 text-center" data-testid={`text-bookings-${property.id}`}>-</td>
                       <td className="p-4">
                         <div className="flex items-center gap-1">
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             onClick={() => viewPropertyDetails(property.id)}
-                            title="View Details"
+                            title="View Property"
+                            data-testid={`button-view-${property.id}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             onClick={() => {
                               setSelectedProperty(property);
                               setShowDetailsDialog(true);
                             }}
                             title="Edit Property"
+                            data-testid={`button-edit-${property.id}`}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -435,11 +431,13 @@ const AdminProperties = () => {
                             <Button
                               size="sm"
                               variant="ghost"
+                              className="text-[#D4A017] hover:text-[#D4A017] hover:bg-yellow-50"
                               onClick={() => {
                                 setSelectedProperty(property);
                                 setShowFeatureDialog(true);
                               }}
-                              title="Force Feature"
+                              title="Feature Property"
+                              data-testid={`button-feature-${property.id}`}
                             >
                               <Star className="h-4 w-4" />
                             </Button>
@@ -448,19 +446,26 @@ const AdminProperties = () => {
                               <Button
                                 size="sm"
                                 variant="ghost"
+                                className="text-[#D4A017] hover:text-[#D4A017] hover:bg-yellow-50"
                                 onClick={() => {
                                   setSelectedProperty(property);
                                   setShowExtendDialog(true);
                                 }}
-                                title="Extend Feature"
+                                title="Extend Feature Duration"
+                                data-testid={`button-extend-${property.id}`}
                               >
                                 <Calendar className="h-4 w-4" />
                               </Button>
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => handleRemoveFeature(property.id)}
+                                className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                                onClick={() => {
+                                  setSelectedProperty(property);
+                                  setShowRemoveFeatureDialog(true);
+                                }}
                                 title="Remove Feature"
+                                data-testid={`button-unfeature-${property.id}`}
                               >
                                 <Clock className="h-4 w-4" />
                               </Button>
@@ -469,13 +474,15 @@ const AdminProperties = () => {
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             onClick={() => {
                               setSelectedProperty(property);
                               setShowDeleteDialog(true);
                             }}
                             title="Delete Property"
+                            data-testid={`button-delete-${property.id}`}
                           >
-                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </td>
@@ -483,6 +490,131 @@ const AdminProperties = () => {
                   ))}
                 </tbody>
               </table>
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {filteredProperties.map((property) => (
+                  <Card key={property.id} data-testid={`card-property-${property.id}`}>
+                    <CardContent className="pt-6">
+                      <div className="space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-semibold text-lg">{property.property_name}</p>
+                            <p className="text-sm text-muted-foreground capitalize">{property.property_type}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Owner: {property.partners?.profiles?.full_name || "Unknown"}
+                            </p>
+                          </div>
+                          {property.is_featured ? (
+                            <Badge className="bg-[#D4A017] hover:bg-[#D4A017]/90">
+                              <Star className="h-3 w-3 mr-1 fill-current" />
+                              Featured
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline">Not Featured</Badge>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                            <span>{property.location}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Status: </span>
+                            {property.is_active ? (
+                              <Badge variant="default" className="ml-1">✓ Active</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="ml-1">Inactive</Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => viewPropertyDetails(property.id)}
+                            data-testid={`button-mobile-view-${property.id}`}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => {
+                              setSelectedProperty(property);
+                              setShowDetailsDialog(true);
+                            }}
+                            data-testid={`button-mobile-edit-${property.id}`}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                          {!property.is_featured ? (
+                            <Button
+                              size="sm"
+                              className="bg-[#D4A017] hover:bg-[#D4A017]/90 text-white"
+                              onClick={() => {
+                                setSelectedProperty(property);
+                                setShowFeatureDialog(true);
+                              }}
+                              data-testid={`button-mobile-feature-${property.id}`}
+                            >
+                              <Star className="h-4 w-4 mr-1" />
+                              Feature
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-[#D4A017] border-yellow-200 hover:bg-yellow-50"
+                                onClick={() => {
+                                  setSelectedProperty(property);
+                                  setShowExtendDialog(true);
+                                }}
+                                data-testid={`button-mobile-extend-${property.id}`}
+                              >
+                                <Calendar className="h-4 w-4 mr-1" />
+                                Extend
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                                onClick={() => {
+                                  setSelectedProperty(property);
+                                  setShowRemoveFeatureDialog(true);
+                                }}
+                                data-testid={`button-mobile-unfeature-${property.id}`}
+                              >
+                                <Clock className="h-4 w-4 mr-1" />
+                                Unfeature
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => {
+                              setSelectedProperty(property);
+                              setShowDeleteDialog(true);
+                            }}
+                            data-testid={`button-mobile-delete-${property.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
@@ -564,6 +696,35 @@ const AdminProperties = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Remove Feature Confirmation Dialog */}
+      <AlertDialog open={showRemoveFeatureDialog} onOpenChange={setShowRemoveFeatureDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Featured Status?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove the featured status from "{selectedProperty?.property_name}"? 
+              This property will no longer appear in the featured section.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (selectedProperty) {
+                  handleRemoveFeature(selectedProperty.id);
+                  setShowRemoveFeatureDialog(false);
+                  setSelectedProperty(null);
+                }
+              }} 
+              className="bg-gray-600 hover:bg-gray-700"
+              data-testid="button-confirm-unfeature"
+            >
+              Remove Feature
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -576,8 +737,8 @@ const AdminProperties = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteProperty} className="bg-destructive hover:bg-destructive/90">
-              Delete
+            <AlertDialogAction onClick={handleDeleteProperty} className="bg-destructive hover:bg-destructive/90" data-testid="button-confirm-delete">
+              Delete Property
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
