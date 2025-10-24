@@ -100,6 +100,8 @@ export const useGlobalSettings = () => {
           setting_key: key,
           setting_value: value,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'setting_key'
         });
 
       if (updateError) throw updateError;
@@ -127,6 +129,8 @@ export const useGlobalSettings = () => {
             setting_key: key,
             setting_value: value,
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'setting_key'
           });
       });
 
