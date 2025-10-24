@@ -1,0 +1,71 @@
+Fix “Page Not Found” on Netlify Refresh
+
+Problem: When reloading routes such as /partner-dashboard or /superadmin-dashboard, Netlify returns a “Page Not Found” error.
+
+Action:
+
+Add a _redirects file in the project’s /public directory.
+
+Content of _redirects file:
+
+/*    /index.html   200
+
+
+Redeploy to Netlify and test all nested routes to ensure pages persist on reload or direct navigation.
+
+Confirm dashboard and other client-side routes open smoothly after refresh.
+
+💬 2️⃣ WhatsApp Automation Feature
+🔹 A. Booking Confirmation → Send to Property Owner
+
+After a user successfully submits a booking form, show a success alert like:
+
+“Booking submitted successfully! ✅ You can also notify the host directly via WhatsApp.”
+
+Include a “Send to WhatsApp” button below the message.
+
+When clicked, it opens WhatsApp with a pre-customized message using the property owner’s saved WhatsApp number from their profile:
+
+https://wa.me/<OwnerNumber>?text=Hello%20<OwnerName>,%20I%20just%20booked%20your%20property%20(<PropertyName>)%20on%20BomaBnB.%20Looking%20forward%20to%20my%20stay!
+
+
+Ensure the message dynamically fetches the property name and owner name.
+
+🔹 B. Partner Registration → Notify Superadmin
+
+After a new partner successfully registers, show:
+
+“Registration successful 🎉. Your account is awaiting approval from our admin team.”
+
+Include a “Send to Admin” button that opens a WhatsApp message to the Superadmin’s official WhatsApp (e.g., +254114097160):
+
+https://wa.me/254114097160?text=Hello%20Patrick,%20a%20new%20partner%20(%3CPartnerName%3E)%20has%20just%20registered%20on%20BomaBnB%20and%20is%20awaiting%20approval.
+
+
+This helps admins stay updated even without checking the dashboard constantly.
+
+🔹 C. Optional Auto Message Formatting
+
+Use dynamic fields with encodeURIComponent() (if JS) to prevent URL errors.
+
+All WhatsApp buttons should open in a new tab (target="_blank").
+
+🧭 3️⃣ UX and Placement
+
+Place booking WhatsApp button below the booking confirmation alert.
+
+Place registration WhatsApp button in the success modal after registration submission.
+
+Use WhatsApp icon (fa-whatsapp) styled in brand color (#25D366) with hover effect.
+
+✅ Expected Outcome
+
+Reloading any route (Partner/Admin Dashboard) no longer triggers “Page Not Found” on Netlify.
+
+After booking → “Send to WhatsApp” button appears with prefilled message to property owner.
+
+After registration → “Send to Admin” button opens prefilled message to Superadmin.
+
+WhatsApp links are clickable, formatted, and personalized.
+
+Smooth, responsive experience maintained across all devices.

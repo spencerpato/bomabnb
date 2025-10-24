@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, CheckCircle2 } from "lucide-react";
+import { Upload, CheckCircle2, MessageCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -65,6 +65,17 @@ const PartnerRegister = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleNotifyAdmin = () => {
+    const adminWhatsApp = "254114097160";
+    const partnerName = formData.fullName || formData.businessName || "Unknown Partner";
+    const message = `Hello Patrick, a new partner (${partnerName}) has just registered on BomaBnB and is awaiting approval.`;
+    
+    window.open(
+      `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -335,32 +346,41 @@ const PartnerRegister = () => {
                 <CheckCircle2 className="h-10 w-10 text-secondary" />
               </div>
             </div>
-            <DialogTitle className="text-center text-2xl">✅ Registration Successful!</DialogTitle>
+            <DialogTitle className="text-center text-2xl">🎉 Registration Successful!</DialogTitle>
             <DialogDescription className="text-center space-y-3 pt-4">
               <p className="text-base">
-                Your account has been submitted for approval.
+                Your account is awaiting approval from our admin team.
               </p>
               <p className="text-sm text-muted-foreground">
-                You will be notified once approved by the admin. This usually takes 24-48 hours.
+                You will be notified once approved. This usually takes 24-48 hours.
               </p>
               <p className="text-xs text-muted-foreground italic">
                 Redirecting to homepage in 5 seconds...
               </p>
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-center gap-3 mt-4">
-            <Button onClick={() => {
-              setShowSuccessModal(false);
-              navigate("/");
-            }} className="bg-primary">
-              Go to Homepage
+          <div className="flex flex-col gap-3 mt-4">
+            <Button 
+              onClick={handleNotifyAdmin}
+              className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white"
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Send to Admin via WhatsApp
             </Button>
-            <Button variant="outline" onClick={() => {
-              setShowSuccessModal(false);
-              navigate("/auth");
-            }}>
-              Try Login
-            </Button>
+            <div className="flex gap-3">
+              <Button onClick={() => {
+                setShowSuccessModal(false);
+                navigate("/");
+              }} className="flex-1 bg-primary">
+                Go to Homepage
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setShowSuccessModal(false);
+                navigate("/auth");
+              }} className="flex-1">
+                Try Login
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

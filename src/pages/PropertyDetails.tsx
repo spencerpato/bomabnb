@@ -64,6 +64,8 @@ const PropertyDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [partnerContact, setPartnerContact] = useState<PartnerContact | null>(null);
+  const [ownerContactForBooking, setOwnerContactForBooking] = useState<{name: string; whatsapp: string} | null>(null);
+  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
   const [bookingForm, setBookingForm] = useState<BookingForm>({
     name: "",
     email: "",
@@ -99,8 +101,8 @@ const PropertyDetails = () => {
       if (propertyError) throw propertyError;
       setProperty(propertyData);
 
-      // Fetch partner contact info if contacts are public
-      if (propertyData.partners?.show_contacts_publicly) {
+      // Always fetch partner contact info for booking WhatsApp functionality
+      if (propertyData.partners?.user_id) {
         const { data: profileData } = await supabase
           .from("profiles")
           .select("full_name, phone_number, whatsapp_number")
@@ -108,13 +110,25 @@ const PropertyDetails = () => {
           .single();
 
         if (profileData) {
-          setPartnerContact({
-            full_name: profileData.full_name,
-            phone_number: profileData.phone_number,
-            whatsapp_number: (profileData as any).whatsapp_number,
-            business_name: propertyData.partners.business_name,
-            show_contacts_publicly: propertyData.partners.show_contacts_publicly,
+          // Set owner contact for booking (always available)
+          const whatsappNumber = (profileData as any).whatsapp_number || profileData.phone_number || propertyData.contact_phone || "";
+          const ownerName = profileData.full_name || propertyData.partners.business_name || "there";
+          
+          setOwnerContactForBooking({
+            name: ownerName,
+            whatsapp: whatsappNumber
           });
+
+          // Set public contact only if publicly visible
+          if (propertyData.partners.show_contacts_publicly) {
+            setPartnerContact({
+              full_name: profileData.full_name,
+              phone_number: profileData.phone_number,
+              whatsapp_number: (profileData as any).whatsapp_number,
+              business_name: propertyData.partners.business_name,
+              show_contacts_publicly: propertyData.partners.show_contacts_publicly,
+            });
+          }
         }
       }
 
@@ -131,6 +145,25 @@ const PropertyDetails = () => {
       navigate("/");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleNotifyOwner = () => {
+    if (!property || !ownerContactForBooking) return;
+    
+    const ownerName = ownerContactForBooking.name;
+    const ownerWhatsApp = ownerContactForBooking.whatsapp.replace(/\D/g, "");
+    const propertyName = property.property_name;
+    
+    const message = `Hello ${ownerName}, I just booked your property (${propertyName}) on BomaBnB. Looking forward to my stay!`;
+    
+    if (ownerWhatsApp) {
+      window.open(
+        `https://wa.me/${ownerWhatsApp}?text=${encodeURIComponent(message)}`,
+        "_blank"
+      );
+    } else {
+      toast.error("Owner WhatsApp number not available");
     }
   };
 
@@ -181,13 +214,10 @@ const PropertyDetails = () => {
           property_id: property.id
         });
 
-      const message = `New Booking Request!\n\nProperty: ${property.property_name}\nGuest: ${bookingForm.name}\nEmail: ${bookingForm.email}\nPhone: ${bookingForm.phone}\nCheck-in: ${bookingForm.checkIn}\nCheck-out: ${bookingForm.checkOut}\nGuests: ${bookingForm.guests}\nTotal: KES ${totalPrice.toLocaleString()}`;
-
-      if (property.contact_phone) {
-        window.open(`https://wa.me/${property.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`, "_blank");
-      }
-
-      toast.success("Booking request sent successfully!");
+      setShowBookingSuccess(true);
+      toast.success("✅ Booking submitted successfully! You can also notify the host directly via WhatsApp.", {
+        duration: 5000
+      });
       setBookingForm({ name: "", email: "", phone: "", checkIn: "", checkOut: "", guests: 1 });
     } catch (error) {
       console.error("Error submitting booking:", error);
@@ -465,9 +495,23 @@ const PropertyDetails = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-primary hover:bg-primary/90"
+                        onClick={() => setShowBookingSuccess(false)}
+                      >
                         Request Booking
                       </Button>
+                      
+                      {showBookingSuccess && ownerContactForBooking && ownerContactForBooking.whatsapp && (
+                        <Button
+                          onClick={handleNotifyOwner}
+                          className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white mt-3"
+                        >
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          Send to WhatsApp
+                        </Button>
+                      )}
                     </form>
                   </div>
 
