@@ -33,6 +33,7 @@ import AdminFeaturedRequests from "./pages/AdminFeaturedRequests";
 import AdminMaintenance from "./pages/AdminMaintenance";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminSettings from "./pages/AdminSettings";
+import AdminReviews from "./pages/AdminReviews";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const AppRoutes = () => {
       <Route path="/admin/maintenance" element={<AdminMaintenance />} />
       <Route path="/admin/notifications" element={<AdminNotifications />} />
       <Route path="/admin/settings" element={<AdminSettings />} />
+      <Route path="/admin/reviews" element={<AdminReviews />} />
       <Route path="/property/:id" element={<PropertyDetails />} />
       <Route path="/add-property" element={<AddProperty />} />
       <Route path="/terms" element={<Terms />} />

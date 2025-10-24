@@ -22,8 +22,11 @@ import {
   List,
   CheckCircle,
   Eye,
+  MessageSquare,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import PropertyReviewsSection from "@/components/partner/PropertyReviewsSection";
+import MigrationNotice from "@/components/MigrationNotice";
 
 interface Partner {
   id: string;
@@ -609,6 +612,18 @@ const PartnerDashboard = () => {
                 </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Migration Notice */}
+        <div className="mb-8">
+          <MigrationNotice />
+        </div>
+
+        {/* Property Reviews Section */}
+        {partner && (
+          <div className="mb-8">
+            <PropertyReviewsSection partnerId={partner.id} />
+          </div>
         )}
 
         {/* Feature My Listing Prompt */}

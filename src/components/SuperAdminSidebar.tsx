@@ -21,6 +21,7 @@ import {
   MessageCircle,
   Phone,
   Mail,
+  MessageSquare,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -125,6 +126,12 @@ export const SuperAdminSidebar = ({ onClose }: SuperAdminSidebarProps) => {
       label: "Featured Requests",
       path: "/admin/featured-requests",
       description: "Feature listing approvals",
+    },
+    {
+      icon: MessageSquare,
+      label: "Reviews",
+      path: "/admin/reviews",
+      description: "Manage ratings & reviews",
     },
     {
       icon: Wrench,

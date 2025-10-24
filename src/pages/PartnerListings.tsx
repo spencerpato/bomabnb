@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label"; // Added Label import
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, Plus, Edit2, Trash2, Eye, EyeOff, Star, Image as ImageIcon, BarChart3, RefreshCw, Search, Upload, X } from "lucide-react";
+import { Home, Plus, Edit2, Trash2, Eye, EyeOff, Star, Image as ImageIcon, BarChart3, RefreshCw, Search, Upload, X, MessageSquare } from "lucide-react";
+import PropertyReviewsSection from "@/components/partner/PropertyReviewsSection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,6 +52,8 @@ const PartnerListings = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [galleryImages, setGalleryImages] = useState<Array<{id: string, image_url: string}>>([]);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [showReviews, setShowReviews] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -89,6 +92,8 @@ const PartnerListings = () => {
         .single();
 
       if (!partner) return;
+      
+      setPartnerId(partner.id);
 
       const { data, error } = await supabase
         .from("properties")
@@ -294,6 +299,14 @@ const PartnerListings = () => {
                 </p>
               </div>
               <div className="flex gap-2">
+                <Button 
+                  variant={showReviews ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => setShowReviews(!showReviews)}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  {showReviews ? "Hide Reviews" : "View Reviews"}
+                </Button>
                 <Button variant="outline" size="sm" onClick={fetchProperties}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
@@ -316,6 +329,13 @@ const PartnerListings = () => {
               />
             </div>
           </div>
+
+          {/* Reviews Section */}
+          {showReviews && partnerId && (
+            <div className="mb-8">
+              <PropertyReviewsSection partnerId={partnerId} />
+            </div>
+          )}
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
