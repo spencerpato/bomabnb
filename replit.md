@@ -63,7 +63,11 @@ Preferred communication style: Simple, everyday language.
 
 **Business Logic**:
 - Partner registration workflow: Submit → Pending → Admin Approval/Rejection → Active/Rejected status
+  - WhatsApp notification: Partners can notify admin (+254 114097160) via WhatsApp after registration
 - Property management: Partners create/edit properties, admins can feature/activate/deactivate
+- Booking workflow: Guests submit booking → Partner receives notification → Guest can send WhatsApp message to owner
+  - WhatsApp automation: After successful booking, guests can contact property owner via WhatsApp with pre-filled message
+  - Fallback chain for owner contact: whatsapp_number → phone_number → property.contact_phone
 - Feature requests: Partners request featured listings, admins approve with duration tracking
 - Notification system: Automated notifications for bookings, approvals, rejections, feature approvals
 
@@ -78,7 +82,11 @@ Preferred communication style: Simple, everyday language.
 
 **Third-Party Integrations**:
 - **Google Maps**: Property location links (google_maps_link field stores URLs)
-- **WhatsApp**: Click-to-chat integration for guest-partner communication (tel: and WhatsApp Web links)
+- **WhatsApp Business**: 
+  - Click-to-chat integration for guest-partner communication
+  - Automated booking confirmation messages to property owners
+  - Partner registration notifications to superadmin (+254 114097160)
+  - Uses WhatsApp Web API (wa.me) with URL encoding for message pre-filling
 - **Email Services**: Contact functionality (mailto: links for clickable email addresses)
 
 **UI Libraries**:
