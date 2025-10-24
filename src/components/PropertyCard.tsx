@@ -2,6 +2,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import StarRating from "./reviews/StarRating";
 
 interface PropertyCardProps {
   property: {
@@ -18,6 +21,37 @@ interface PropertyCardProps {
 }
 
 export const PropertyCard = ({ property, onViewDetails }: PropertyCardProps) => {
+  const [rating, setRating] = useState<{ average: number; count: number } | null>(null);
+
+  useEffect(() => {
+    const fetchRating = async () => {
+      try {
+        const { data, error } = await supabase.rpc('get_property_rating', {
+          p_property_id: property.id
+        });
+        
+        if (!error && data) {
+          setRating({ average: data.average_rating || 0, count: data.total_reviews || 0 });
+        } else {
+          const { data: reviews } = await supabase
+            .from('property_reviews' as any)
+            .select('rating')
+            .eq('property_id', property.id)
+            .eq('is_approved', true);
+          
+          if (reviews && reviews.length > 0) {
+            const avg = reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length;
+            setRating({ average: avg, count: reviews.length });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching rating:', error);
+      }
+    };
+
+    fetchRating();
+  }, [property.id]);
+
   return (
     <Card className={`overflow-hidden transition-all duration-300 group ${
       property.is_featured 
@@ -52,6 +86,13 @@ export const PropertyCard = ({ property, onViewDetails }: PropertyCardProps) => 
         <h3 className="font-heading font-bold text-lg sm:text-xl mb-2 text-foreground group-hover:text-primary transition-colors line-clamp-2">
           {property.property_name}
         </h3>
+
+        {rating && rating.count > 0 && (
+          <div className="flex items-center gap-2 mb-2">
+            <StarRating rating={rating.average} size="sm" showNumber />
+            <span className="text-xs text-muted-foreground">({rating.count})</span>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 text-muted-foreground mb-3">
           <MapPin className="h-4 w-4 text-accent" />

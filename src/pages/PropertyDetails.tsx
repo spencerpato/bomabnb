@@ -10,8 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Users, Home, Phone, Mail, MessageCircle, Calendar, X, User } from "lucide-react";
+import { MapPin, Users, Home, Phone, Mail, MessageCircle, Calendar, X, User, Star } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import RatingSummary from "@/components/reviews/RatingSummary";
+import ReviewList from "@/components/reviews/ReviewList";
+import ReviewForm from "@/components/reviews/ReviewForm";
 
 interface Property {
   id: string;
@@ -66,6 +69,7 @@ const PropertyDetails = () => {
   const [partnerContact, setPartnerContact] = useState<PartnerContact | null>(null);
   const [ownerContactForBooking, setOwnerContactForBooking] = useState<{name: string; whatsapp: string} | null>(null);
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const [bookingForm, setBookingForm] = useState<BookingForm>({
     name: "",
     email: "",
@@ -412,6 +416,48 @@ const PropertyDetails = () => {
                   </Button>
                 </div>
               )}
+
+              {/* Ratings & Reviews Section */}
+              <div className="border-t pt-8 mt-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <h2 className="font-heading font-bold text-2xl sm:text-3xl">Ratings & Reviews</h2>
+                  <Button 
+                    onClick={() => setShowReviewForm(!showReviewForm)}
+                    className="w-full sm:w-auto"
+                  >
+                    <Star className="mr-2 h-4 w-4" />
+                    {showReviewForm ? "Cancel" : "Leave a Review"}
+                  </Button>
+                </div>
+
+                {/* Rating Summary */}
+                <div className="mb-8">
+                  <RatingSummary propertyId={id!} />
+                </div>
+
+                {/* Review Form */}
+                {showReviewForm && (
+                  <Card className="mb-8">
+                    <CardContent className="pt-6">
+                      <h3 className="font-semibold text-lg mb-4">Share Your Experience</h3>
+                      <ReviewForm
+                        propertyId={id!}
+                        onSuccess={() => {
+                          setShowReviewForm(false);
+                          toast.success("Thank you for your review!");
+                        }}
+                        onCancel={() => setShowReviewForm(false)}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Reviews List */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">Recent Reviews</h3>
+                  <ReviewList propertyId={id!} />
+                </div>
+              </div>
             </div>
 
             {/* Booking Section */}
