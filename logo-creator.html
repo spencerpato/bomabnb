@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BomaBnB Logo Creator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .logo-preview {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            background: #F9F7F3;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 3px solid #D4A017;
+        }
+        
+        .house {
+            width: 80px;
+            height: 60px;
+            background: #D4A017;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        
+        .house::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -5px;
+            width: 90px;
+            height: 20px;
+            background: #D4A017;
+            border-radius: 8px 8px 0 0;
+            transform: rotate(-2deg);
+        }
+        
+        .person {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 15px;
+            background: #2D5016;
+            border-radius: 2px;
+        }
+        
+        .person::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #2D5016;
+            border-radius: 50%;
+        }
+        
+        .bed {
+            position: absolute;
+            bottom: 5px;
+            left: 10px;
+            width: 60px;
+            height: 8px;
+            background: #2D5016;
+            border-radius: 2px;
+        }
+        
+        .bed::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 0;
+            width: 8px;
+            height: 5px;
+            background: #2D5016;
+            border-radius: 1px;
+        }
+        
+        .text {
+            color: #2D5016;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        
+        .specs {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .specs h3 {
+            margin-top: 0;
+            color: #D4A017;
+        }
+        
+        .color-spec {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .color-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+        }
+        
+        .download-btn {
+            background: #D4A017;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: #B8860B;
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 BomaBnB Logo Creator</h1>
+        <p>Use this as a reference to create your official BomaBnB logo</p>
+        
+        <div class="logo-preview">
+            <div class="house">
+                <div class="person"></div>
+                <div class="bed"></div>
+            </div>
+            <div class="text">BomaBnB</div>
+        </div>
+        
+        <div class="specs">
+            <h3>🎨 Design Specifications</h3>
+            
+            <div class="color-spec">
+                <div class="color-box" style="background: #F9F7F3;"></div>
+                <div>
+                    <strong>Background:</strong> Light Beige (#F9F7F3)
+                </div>
+            </div>
+            
+            <div class="color-spec">
+                <div class="color-box" style="background: #D4A017;"></div>
+                <div>
+                    <strong>House:</strong> Safari Gold (#D4A017)
+                </div>
+            </div>
+            
+            <div class="color-spec">
+                <div class="color-box" style="background: #2D5016;"></div>
+                <div>
+                    <strong>Interior & Text:</strong> Dark Green (#2D5016)
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📝 Creation Instructions</h3>
+            <ol>
+                <li><strong>Create a 512x512 pixel canvas</strong> with light beige background</li>
+                <li><strong>Draw the house shape</strong> in orange-brown with rounded corners</li>
+                <li><strong>Add sleeping person silhouette</strong> in dark green inside the house</li>
+                <li><strong>Include the bed</strong> with headboard in dark green</li>
+                <li><strong>Add "BomaBnB" text</strong> in dark green sans-serif font</li>
+                <li><strong>Export as PNG</strong> with transparent background</li>
+                <li><strong>Save as "bomabnb-logo-512x512.png"</strong></li>
+            </ol>
+        </div>
+        
+        <button class="download-btn" onclick="downloadLogo()">
+            📥 Download Reference Image
+        </button>
+        
+        <div class="instructions">
+            <h3>🛠️ Tools You Can Use</h3>
+            <ul>
+                <li><strong>Figma</strong> (Free, web-based) - Recommended</li>
+                <li><strong>Canva</strong> (User-friendly)</li>
+                <li><strong>Adobe Illustrator</strong> (Professional)</li>
+                <li><strong>GIMP</strong> (Free alternative)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        function downloadLogo() {
+            // Create a canvas to generate the logo
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            // Set background
+            ctx.fillStyle = '#F9F7F3';
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Draw house
+            ctx.fillStyle = '#D4A017';
+            ctx.roundRect(150, 200, 200, 150, 20);
+            ctx.fill();
+            
+            // Draw roof
+            ctx.beginPath();
+            ctx.moveTo(120, 200);
+            ctx.lineTo(250, 120);
+            ctx.lineTo(380, 200);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw person
+            ctx.fillStyle = '#2D5016';
+            ctx.beginPath();
+            ctx.arc(250, 280, 15, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Draw body
+            ctx.fillRect(240, 295, 20, 30);
+            
+            // Draw bed
+            ctx.fillRect(170, 320, 160, 20);
+            ctx.fillRect(170, 300, 20, 20);
+            
+            // Draw text
+            ctx.fillStyle = '#2D5016';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('BomaBnB', 250, 400);
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = 'bomabnb-logo-reference.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // Add roundRect method if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html>
