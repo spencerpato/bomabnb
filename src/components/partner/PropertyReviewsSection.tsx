@@ -42,8 +42,10 @@ const PropertyReviewsSection = ({ partnerId }: PropertyReviewsSectionProps) => {
   }, [partnerId]);
 
   useEffect(() => {
-    fetchReviews();
-  }, [partnerId, selectedProperty]);
+    if (properties.length > 0 || selectedProperty !== "all") {
+      fetchReviews();
+    }
+  }, [partnerId, selectedProperty, properties]);
 
   const fetchProperties = async () => {
     try {
@@ -63,6 +65,13 @@ const PropertyReviewsSection = ({ partnerId }: PropertyReviewsSectionProps) => {
   const fetchReviews = async () => {
     setLoading(true);
     try {
+      if (selectedProperty === "all" && properties.length === 0) {
+        setReviews([]);
+        setStats({ total: 0, averageRating: 0 });
+        setLoading(false);
+        return;
+      }
+
       let query = supabase
         .from("property_reviews" as any)
         .select(
@@ -81,7 +90,7 @@ const PropertyReviewsSection = ({ partnerId }: PropertyReviewsSectionProps) => {
 
       if (selectedProperty !== "all") {
         query = query.eq("property_id", selectedProperty);
-      } else if (properties.length > 0) {
+      } else {
         query = query.in(
           "property_id",
           properties.map((p) => p.id)
