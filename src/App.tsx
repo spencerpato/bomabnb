@@ -34,6 +34,10 @@ import AdminMaintenance from "./pages/AdminMaintenance";
 import AdminNotifications from "./pages/AdminNotifications";
 import AdminSettings from "./pages/AdminSettings";
 import AdminReviews from "./pages/AdminReviews";
+import ReferrerDashboard from "./pages/ReferrerDashboard";
+import ReferrerLink from "./pages/ReferrerLink";
+import ReferrerReferrals from "./pages/ReferrerReferrals";
+import ReferrerCommissions from "./pages/ReferrerCommissions";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +74,13 @@ const AppRoutes = () => {
       <Route path="/partner-support" element={<PartnerSupport />} />
       <Route path="/partner-settings" element={<PartnerSettings />} />
       <Route path="/edit-property/:id" element={<EditProperty />} />
+      
+      {/* Referrer Routes */}
+      <Route path="/referrer-dashboard" element={<ReferrerDashboard />} />
+      <Route path="/referrer-link" element={<ReferrerLink />} />
+      <Route path="/referrer-referrals" element={<ReferrerReferrals />} />
+      <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
+      
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
