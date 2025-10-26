@@ -1,0 +1,92 @@
+You are analyzing an existing project named Bomabnb, a web platform that connects travelers with local BnBs.
+Your task is to review and fix issues in the Superadmin Dashboard to ensure full functionality, proper backend connectivity, and professional responsiveness.
+
+1️⃣ Partner Management
+
+Ensure every partner record in the Partner Management table has clear, responsive action buttons:
+
+✅ Approve — sets status to “approved”
+
+🚫 Suspend — sets status to “suspended”
+
+🔄 Reactivate — sets status back to “approved”
+
+❌ Delete — removes the partner and their associated listings
+
+Each action should:
+
+Update the database immediately
+
+Display a success or error alert
+
+Refresh the table dynamically
+
+Add a confirmation modal for sensitive actions (like Suspend/Delete).
+
+2️⃣ Property Management (Featured System)
+
+Verify each property record includes an is_featured (boolean) or featured_until (date) field.
+
+Add working action buttons:
+
+🌟 Feature / Unfeature toggle
+
+Ensure featured properties:
+
+Always appear at the top of homepage and listings
+
+Are visually distinct (e.g., a gold “Featured” tag)
+
+Can be unfeatured any time
+
+Confirm the feature/unfeature action updates the backend instantly and gives clear visual feedback.
+
+3️⃣ Settings Page
+
+Ensure the Superadmin can save and update contact details:
+
+WhatsApp (with +254 prefix)
+
+Phone number
+
+Email address
+
+Verify form submission updates the backend correctly (no empty or broken endpoints).
+
+Display a clear “Settings saved successfully ✅” toast or message upon saving.
+
+4️⃣ Design and Responsiveness
+
+Keep all Superadmin pages fully responsive across devices.
+
+Maintain a consistent sidebar layout:
+
+Sidebar remains visible or collapsible on smaller screens.
+
+Highlight the active section.
+
+Use professional color coordination consistent with the Bomabnb branding:
+
+Safari Gold #D4A017
+
+Forest Green #2E5339
+
+Red Clay #B6461E
+
+Off White #F9F7F3
+
+5️⃣ General Behavior
+
+All backend updates must sync instantly without full-page reloads.
+
+Add proper success/error notifications.
+
+Ensure no Supabase confirmation emails are sent on registration approvals.
+
+Test every Superadmin action to verify correct role-based permissions and database reflection.
+
+After all verifications and implementations:
+✅ Partner status changes work perfectly
+✅ Property featuring functions properly
+✅ Settings save as expected
+✅ UI is mobile-friendly and professional

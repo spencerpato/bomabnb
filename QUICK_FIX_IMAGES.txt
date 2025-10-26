@@ -1,0 +1,101 @@
+═══════════════════════════════════════════════════════════════
+  🖼️ QUICK FIX: Property Images Upload Error
+═══════════════════════════════════════════════════════════════
+
+ERROR YOU'RE SEEING:
+"new row violates row-level security policy"
+
+WHY IT'S HAPPENING:
+The storage bucket for property images doesn't have permission policies set up.
+
+═══════════════════════════════════════════════════════════════
+  ⚡ QUICK FIX (2 Minutes)
+═══════════════════════════════════════════════════════════════
+
+OPTION 1: Apply Migration (Recommended)
+─────────────────────────────────────────
+
+If you're using Supabase CLI locally:
+
+1. Open terminal in your project folder
+2. Run:
+   
+   npx supabase db push
+
+3. Done! ✅
+
+─────────────────────────────────────────
+
+OPTION 2: Manual SQL in Supabase Dashboard
+─────────────────────────────────────────
+
+1. Go to: https://supabase.com/dashboard
+2. Click your project
+3. Go to: SQL Editor (left sidebar)
+4. Click: "+ New Query"
+5. Copy and paste the SQL from:
+   
+   supabase/migrations/create_property_images_bucket.sql
+
+6. Click: "Run" (or press Ctrl+Enter)
+7. You should see: "Success. No rows returned"
+8. Done! ✅
+
+─────────────────────────────────────────
+
+OPTION 3: Create Bucket Manually
+─────────────────────────────────────────
+
+1. Go to: Storage (left sidebar in Supabase Dashboard)
+2. Click: "+ New bucket"
+3. Settings:
+   - Name: property-images
+   - ✅ Check "Public bucket"
+4. Click: "Create bucket"
+5. Then run the SQL from Option 2 above
+6. Done! ✅
+
+═══════════════════════════════════════════════════════════════
+  🧪 TEST IT WORKS
+═══════════════════════════════════════════════════════════════
+
+After applying the fix:
+
+1. Go to: http://localhost:8080/add-property
+2. Fill in property details
+3. Upload a featured image
+4. Click "Add Property"
+5. ✅ Image should upload successfully!
+6. Go to "My Properties" → Click "Images" button
+7. ✅ Upload should work!
+
+═══════════════════════════════════════════════════════════════
+  📝 WHAT THIS FIX DOES
+═══════════════════════════════════════════════════════════════
+
+✅ Creates 'property-images' storage bucket
+✅ Makes bucket PUBLIC (anyone can view images)
+✅ Allows AUTHENTICATED users to upload
+✅ Allows AUTHENTICATED users to update/delete their images
+✅ Enables Row Level Security with proper policies
+
+═══════════════════════════════════════════════════════════════
+  ❓ STILL NOT WORKING?
+═══════════════════════════════════════════════════════════════
+
+Check these:
+
+1. Make sure you're LOGGED IN as a partner
+2. Check browser console (F12) for errors
+3. Verify Supabase connection in .env file
+4. Make sure the bucket name is exactly: property-images
+5. Check if policies are active in Supabase Dashboard:
+   Storage → property-images → Policies tab
+
+═══════════════════════════════════════════════════════════════
+  📚 MORE INFO
+═══════════════════════════════════════════════════════════════
+
+See: FIX_STORAGE_RLS.md for detailed troubleshooting
+
+═══════════════════════════════════════════════════════════════

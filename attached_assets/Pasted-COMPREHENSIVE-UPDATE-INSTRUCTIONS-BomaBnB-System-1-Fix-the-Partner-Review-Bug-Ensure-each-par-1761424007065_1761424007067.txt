@@ -1,0 +1,99 @@
+COMPREHENSIVE UPDATE INSTRUCTIONS — BomaBnB System
+🔧 1. Fix the Partner Review Bug
+
+Ensure each partner only sees reviews belonging to their own listed properties.
+
+Update the backend query logic to filter reviews strictly by the currently logged-in partner.
+
+Confirm that no reviews from other partners are visible.
+
+🗑️ 2. Remove the Migration Tab
+
+Delete the “Migration” menu item from the partner dashboard sidebar and navigation bar.
+
+Remove any corresponding routes or templates linked to that tab.
+
+Verify the dashboard loads normally without any missing-menu errors.
+
+🤝 3. Implement the Referral System
+Objective
+
+Allow middlemen/agents to earn commissions when they onboard new hosts through their unique referral links.
+
+Key Behavior
+
+Each referrer (agent) receives a unique referral link used to invite hosts.
+
+When a host registers using that link, the system records who referred them.
+
+All properties and bookings created by that referred host are automatically tied to the referrer.
+
+Referrer Dashboard Should Include
+
+Overview Page
+
+Total referred hosts
+
+Total listed properties by referred hosts
+
+Total bookings from referred properties
+
+Total commissions earned
+
+My Referral Link Page
+
+Display referral link with copy/share options (WhatsApp, Facebook, etc.).
+
+My Referrals Page
+
+List all hosts joined via referral with their basic stats (number of properties, total bookings).
+
+Properties from My Referrals
+
+Show only the properties belonging to referred hosts.
+
+Bookings from My Referrals
+
+Display booking list related to referred properties with details such as booking date, amount, and status.
+
+Commissions & Payouts Page
+
+Summarize total earnings, pending commissions, and payout history.
+
+Include a “Request Payout” button.
+
+Access Control
+
+Referrers see only their referral-related data.
+
+Partners see only their own listings and bookings.
+
+Superadmin retains visibility of all system data.
+
+Commission Setup
+
+Commission defaults to 10% of every completed booking from referred partners.
+
+The commission is automatically added to the referrer’s record when a booking is marked as completed.
+
+Optionally include payout requests and a status tracker for transparency.
+
+🧠 4. General Behavior Notes
+
+Maintain clean dashboard UI separation: Partner, Referrer, Admin, and Superadmin dashboards should each have distinct sidebars and visual identities.
+
+Ensure consistency of the responsive design across all devices (mobile, tablet, desktop).
+
+Test the workflow: Referral link → Partner registration → Property listing → Booking → Commission update → Referrer dashboard display.
+
+Confirm email and/or WhatsApp notifications are triggered properly upon successful registration and booking actions.
+
+✅ Expected Results
+
+Partners see only their own reviews.
+
+The Migration tab no longer appears.
+
+Referral system is live and functional with its own dashboard, referral link, commission tracking, and restricted data views.
+
+The system runs smoothly across all dashboards with no visual or permission bugs.

@@ -1,0 +1,69 @@
+Instructions to Update BomaBnB Homepage & System (Agent Feature + Fixes)
+
+Homepage Updates
+
+Add a third button labeled “Join as Agent” on top of the homepage carousel alongside Partner With Us and Partner Login buttons.
+
+The Join as Agent button should be slightly smaller in size for visual balance.
+
+Clicking the button should redirect to the same registration modal/page used by partners, but when selected, it should register the user with the role “Agent.”
+
+Add a hover tooltip or caption: “Earn commission by referring hosts to BomaBnB.”
+
+Login Modal
+
+Agents should log in using the same login form used by partners.
+
+On login, the system should detect the user role (Agent or Partner) and automatically redirect them to their respective dashboard.
+
+Agent Dashboard
+
+Keep a persistent sidebar (same design as partner dashboard).
+
+Include:
+
+Profile section: agent name, email, contact, total referred users, and total commissions earned.
+
+Referred Properties tab: show a list of all properties added by partners who registered using the agent’s referral link (with property name, owner, location, and status).
+
+Bookings tab: show all bookings for those referred properties, including status (pending, confirmed, declined).
+
+Commission tab: overview of total commission earned per booking.
+
+Notifications tab: updates on referred users and system messages.
+
+Logout button.
+
+Referral Registration Logic
+
+Each agent should have a unique referral link, automatically generated upon registration.
+
+When a partner signs up through that link, the system automatically assigns that partner’s properties and bookings to the referring agent.
+
+Admin Dashboard Updates
+
+In the Partner Management section, include a column showing the referring agent (if any).
+
+Add an Agent Management section where the superadmin can:
+
+View agent profiles and referred partners.
+
+Edit, suspend, or delete an agent.
+
+Manage agent commissions and payouts.
+
+Fixes & Improvements
+
+Fix the reviews issue: Ensure each partner only sees reviews and ratings related to their own properties.
+
+Remove the “Migration” tab from the partner dashboard.
+
+Ensure Netlify 404 error when reloading dashboards is fixed by properly configuring route redirects.
+
+Maintain sidebar persistence on all dashboards and highlight the active page.
+
+Responsiveness
+
+All dashboards (admin, partner, and agent) and homepage must be fully mobile responsive, automatically adjusting layouts for phones and tablets.
+
+Buttons on mobile should remain visible on the carousel (especially Partner With Us, Partner Login, and Join as Agent).

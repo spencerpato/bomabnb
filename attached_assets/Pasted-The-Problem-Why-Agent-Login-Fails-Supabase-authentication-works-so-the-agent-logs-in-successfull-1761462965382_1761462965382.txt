@@ -1,0 +1,72 @@
+The Problem (Why Agent Login Fails)
+
+Supabase authentication works, so the agent logs in successfully.
+
+But your app’s post-login check (where you redirect based on role) only looks for:
+
+partner
+
+superadmin
+
+maybe admin
+...and it doesn’t include a condition for agent.
+So the code falls to a “default” path — usually redirecting to homepage.
+
+That’s why you’re just seeing the homepage with the logout button.
+
+Also, since your alert logic runs after a role or status check, and the role agent is missing, no alert appears for pending or invalid logins.
+
+🧭 Here’s What You Need to Do
+1. Check Your Login Logic File (usually login.js or authHandler.js)
+
+There’s a section that checks something like:
+
+if (role === "superadmin") {
+  // redirect to superadmin dashboard
+} else if (role === "partner") {
+  // redirect to partner dashboard
+}
+
+
+✅ Add this new condition right below:
+
+else if (role === "agent") {
+  if (status === "approved") {
+    redirect("/agent-dashboard");
+  } else if (status === "pending") {
+    showAlert("Your agent account is pending approval.");
+  } else if (status === "suspended") {
+    showAlert("Your agent account has been suspended. Contact support.");
+  } else {
+    showAlert("Invalid agent credentials or unregistered account.");
+  }
+}
+
+2. Ensure the Agent Table Is Queried After Login
+
+Immediately after a successful Supabase login, fetch from the referrers table:
+
+select * from referrers where email = user.email
+
+
+If no record → alert “Invalid agent credentials.”
+If found → use the role and status fields for logic above.
+
+3. Add Role & Status Columns (if missing)
+
+In referrers table, make sure you have:
+
+role → "agent"
+
+status → "pending", "approved", or "suspended"
+
+4. Verify Row-Level Security (RLS)
+
+If you’ve enabled RLS in Supabase, ensure your policies allow agents to read their own data (auth.uid() = user_id). Otherwise, the system won’t fetch their status, hence no redirect or alert.
+
+5. Test Cases (Expected Behavior)
+Scenario	Expected Outcome
+Nonexistent agent	Alert “Invalid agent credentials.”
+Pending approval	Alert “Your agent account is pending approval.”
+Suspended agent	Alert “Your account is suspended.”
+Approved agent	Redirect to /agent-dashboard

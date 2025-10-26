@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "@/components/Navigation";
-import { Footer } from "@/components/Footer";
+import { PartnerLayout } from "@/components/PartnerLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -105,9 +104,36 @@ const AddProperty = () => {
 
     setIsLoading(true);
     try {
-      // For now, using placeholder image URLs since storage buckets aren't set up
-      // In production, you'd upload to Supabase Storage here
-      const featuredImageUrl = featuredImagePreview;
+      // Upload featured image to Supabase Storage
+      let featuredImageUrl = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"; // fallback
+      
+      if (featuredImage) {
+        const fileExt = featuredImage.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `properties/${fileName}`;
+
+        console.log('Uploading image to:', filePath);
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('property-images')
+          .upload(filePath, featuredImage, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (!uploadError && uploadData) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('property-images')
+            .getPublicUrl(filePath);
+          featuredImageUrl = publicUrl;
+          console.log('Image uploaded successfully:', publicUrl);
+          toast.success("Image uploaded successfully!");
+        } else {
+          console.error('Upload error:', uploadError);
+          toast.error(`Image upload failed: ${uploadError?.message || 'Unknown error'}. Using placeholder.`);
+          // Continue with placeholder if upload fails
+        }
+      }
 
       const { data: propertyData, error: propertyError } = await supabase
         .from("properties")
@@ -116,7 +142,7 @@ const AddProperty = () => {
           property_name: formData.propertyName,
           property_type: formData.propertyType.toLowerCase() as "apartment" | "cottage" | "villa" | "guesthouse" | "hostel" | "other",
           location: formData.location,
-          description: formData.description,
+          description: formData.description || null,
           price_per_night: parseFloat(formData.pricePerNight),
           number_of_units: parseInt(formData.numberOfUnits),
           max_guests_per_unit: parseInt(formData.maxGuestsPerUnit),
@@ -133,17 +159,28 @@ const AddProperty = () => {
 
       // Upload additional images if any
       if (additionalImages.length > 0 && propertyData) {
-        const imageInserts = additionalImages.map((_, index) => ({
-          property_id: propertyData.id,
-          image_url: featuredImageUrl, // Using same URL for demo
-          display_order: index,
-        }));
+        for (let i = 0; i < additionalImages.length; i++) {
+          const file = additionalImages[i];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${i}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `properties/${fileName}`;
 
-        const { error: imagesError } = await supabase
-          .from("property_images")
-          .insert(imageInserts);
+          const { error: uploadError } = await supabase.storage
+            .from('property-images')
+            .upload(filePath, file);
 
-        if (imagesError) console.error("Error uploading additional images:", imagesError);
+          if (!uploadError) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('property-images')
+              .getPublicUrl(filePath);
+
+            await supabase.from("property_images").insert({
+              property_id: propertyData.id,
+              image_url: publicUrl,
+              display_order: i,
+            });
+          }
+        }
       }
 
       toast.success("Property added successfully!");
@@ -166,14 +203,8 @@ const AddProperty = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Navigation />
-
-      <div className="flex-1 px-4 py-12">
-        <div className="container mx-auto max-w-4xl">
-          <Button variant="ghost" onClick={() => navigate("/partner-dashboard")} className="mb-6">
-            ← Back to Dashboard
-          </Button>
+    <PartnerLayout>
+      <div className="max-w-4xl mx-auto">
 
           <Card>
             <CardHeader>
@@ -257,14 +288,13 @@ const AddProperty = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description *</Label>
+                  <Label htmlFor="description">Description (Optional)</Label>
                   <Textarea
                     id="description"
                     rows={5}
                     placeholder="Describe your property, its features, and what makes it special..."
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
                   />
                 </div>
 
@@ -375,11 +405,8 @@ const AddProperty = () => {
               </form>
             </CardContent>
           </Card>
-        </div>
       </div>
-
-      <Footer />
-    </div>
+    </PartnerLayout>
   );
 };
 

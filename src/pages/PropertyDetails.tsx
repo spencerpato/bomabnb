@@ -10,8 +10,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MapPin, Users, Home, Phone, Mail, MessageCircle, Calendar } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { MapPin, Users, Home, Phone, Mail, MessageCircle, Calendar, X, User, Star } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import RatingSummary from "@/components/reviews/RatingSummary";
+import ReviewList from "@/components/reviews/ReviewList";
+import ReviewForm from "@/components/reviews/ReviewForm";
 
 interface Property {
   id: string;
@@ -28,6 +31,19 @@ interface Property {
   contact_phone?: string;
   google_maps_link?: string;
   terms_policies?: string;
+  partners?: {
+    business_name: string;
+    show_contacts_publicly: boolean;
+    user_id: string;
+  };
+}
+
+interface PartnerContact {
+  full_name: string;
+  phone_number?: string;
+  whatsapp_number?: string;
+  business_name?: string;
+  show_contacts_publicly: boolean;
 }
 
 interface PropertyImage {
@@ -49,6 +65,11 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [images, setImages] = useState<PropertyImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [partnerContact, setPartnerContact] = useState<PartnerContact | null>(null);
+  const [ownerContactForBooking, setOwnerContactForBooking] = useState<{name: string; whatsapp: string} | null>(null);
+  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
   const [bookingForm, setBookingForm] = useState<BookingForm>({
     name: "",
     email: "",
@@ -69,13 +90,51 @@ const PropertyDetails = () => {
       setIsLoading(true);
       const { data: propertyData, error: propertyError } = await supabase
         .from("properties")
-        .select("*")
+        .select(`
+          *,
+          partners (
+            business_name,
+            show_contacts_publicly,
+            user_id
+          )
+        `)
         .eq("id", id)
         .eq("is_active", true)
         .single();
 
       if (propertyError) throw propertyError;
       setProperty(propertyData);
+
+      // Always fetch partner contact info for booking WhatsApp functionality
+      if (propertyData.partners?.user_id) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("full_name, phone_number, whatsapp_number")
+          .eq("id", propertyData.partners.user_id)
+          .single();
+
+        if (profileData) {
+          // Set owner contact for booking (always available)
+          const whatsappNumber = (profileData as any).whatsapp_number || profileData.phone_number || propertyData.contact_phone || "";
+          const ownerName = profileData.full_name || propertyData.partners.business_name || "there";
+          
+          setOwnerContactForBooking({
+            name: ownerName,
+            whatsapp: whatsappNumber
+          });
+
+          // Set public contact only if publicly visible
+          if (propertyData.partners.show_contacts_publicly) {
+            setPartnerContact({
+              full_name: profileData.full_name,
+              phone_number: profileData.phone_number,
+              whatsapp_number: (profileData as any).whatsapp_number,
+              business_name: propertyData.partners.business_name,
+              show_contacts_publicly: propertyData.partners.show_contacts_publicly,
+            });
+          }
+        }
+      }
 
       const { data: imagesData } = await supabase
         .from("property_images")
@@ -93,12 +152,43 @@ const PropertyDetails = () => {
     }
   };
 
+  const handleNotifyOwner = () => {
+    if (!property || !ownerContactForBooking) return;
+    
+    const ownerName = ownerContactForBooking.name;
+    const ownerWhatsApp = ownerContactForBooking.whatsapp.replace(/\D/g, "");
+    const propertyName = property.property_name;
+    
+    const message = `Hello ${ownerName}, I just booked your property (${propertyName}) on BomaBnB. Looking forward to my stay!`;
+    
+    if (ownerWhatsApp) {
+      window.open(
+        `https://wa.me/${ownerWhatsApp}?text=${encodeURIComponent(message)}`,
+        "_blank"
+      );
+    } else {
+      toast.error("Owner WhatsApp number not available");
+    }
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!property) return;
 
     try {
+      // First, get the partner ID for this property
+      const { data: propertyData } = await supabase
+        .from("properties")
+        .select("partner_id")
+        .eq("id", property.id)
+        .single();
+
+      if (!propertyData) {
+        throw new Error("Property not found");
+      }
+
+      // Insert the booking
       const { error } = await supabase.from("bookings").insert({
         property_id: property.id,
         guest_name: bookingForm.name,
@@ -113,13 +203,25 @@ const PropertyDetails = () => {
 
       if (error) throw error;
 
-      const message = `New Booking Request!\n\nProperty: ${property.property_name}\nGuest: ${bookingForm.name}\nEmail: ${bookingForm.email}\nPhone: ${bookingForm.phone}\nCheck-in: ${bookingForm.checkIn}\nCheck-out: ${bookingForm.checkOut}\nGuests: ${bookingForm.guests}\nTotal: KES ${(property.price_per_night * calculateNights()).toLocaleString()}`;
+      // Create notification for the partner
+      const totalPrice = property.price_per_night * calculateNights();
+      const nights = calculateNights();
+      
+      await supabase
+        .from("partner_notifications")
+        .insert({
+          partner_id: propertyData.partner_id,
+          type: "new_booking",
+          title: "🎉 New Booking Request",
+          message: `You have a new booking request for "${property.property_name}"!\n\nGuest: ${bookingForm.name}\nEmail: ${bookingForm.email}\nPhone: ${bookingForm.phone}\nCheck-in: ${bookingForm.checkIn}\nCheck-out: ${bookingForm.checkOut}\nGuests: ${bookingForm.guests}\nNights: ${nights}\nTotal: KES ${totalPrice.toLocaleString()}\n\nPlease respond to the guest as soon as possible.`,
+          status: "unread",
+          property_id: property.id
+        });
 
-      if (property.contact_phone) {
-        window.open(`https://wa.me/${property.contact_phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`, "_blank");
-      }
-
-      toast.success("Booking request sent successfully!");
+      setShowBookingSuccess(true);
+      toast.success("✅ Booking submitted successfully! You can also notify the host directly via WhatsApp.", {
+        duration: 5000
+      });
       setBookingForm({ name: "", email: "", phone: "", checkIn: "", checkOut: "", guests: 1 });
     } catch (error) {
       console.error("Error submitting booking:", error);
@@ -137,8 +239,27 @@ const PropertyDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading property...</p>
+      <div className="min-h-screen flex flex-col bg-background">
+        <Navigation />
+        <div className="flex-1 px-4 py-8">
+          <div className="container mx-auto max-w-6xl">
+            <div className="h-10 w-20 bg-muted rounded mb-6 animate-pulse"></div>
+            {/* Image Skeleton */}
+            <div className="aspect-[16/9] bg-muted rounded-2xl mb-8 animate-pulse"></div>
+            {/* Content Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="h-10 bg-muted rounded w-3/4 animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
+                <div className="h-32 bg-muted rounded animate-pulse"></div>
+              </div>
+              <div className="space-y-4">
+                <div className="h-64 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -146,8 +267,6 @@ const PropertyDetails = () => {
   if (!property) {
     return null;
   }
-
-  const allImages = [property.featured_image, ...images.map((img) => img.image_url)];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -160,24 +279,63 @@ const PropertyDetails = () => {
           </Button>
 
           {/* Image Gallery */}
-          <div className="mb-8">
-            <Carousel className="w-full">
-              <CarouselContent>
-                {allImages.map((url, index) => (
-                  <CarouselItem key={index}>
-                    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl">
-                      <img src={url} alt={`${property.property_name} - Image ${index + 1}`} className="w-full h-full object-cover" />
+          <div className="mb-8 space-y-4">
+            {/* Featured Image */}
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl">
+              <img 
+                src={property.featured_image} 
+                alt={property.property_name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800";
+                }}
+              />
+            </div>
+
+            {/* Gallery Images Grid */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {images.map((img, index) => (
+                  <div 
+                    key={index} 
+                    className="relative aspect-video overflow-hidden rounded-lg cursor-pointer hover:opacity-90 transition-opacity group"
+                    onClick={() => setSelectedImage(img.image_url)}
+                  >
+                    <img 
+                      src={img.image_url} 
+                      alt={`${property.property_name} - Gallery ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <p className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">Click to enlarge</p>
                     </div>
-                  </CarouselItem>
+                  </div>
                 ))}
-              </CarouselContent>
-              {allImages.length > 1 && (
-                <>
-                  <CarouselPrevious className="left-4" />
-                  <CarouselNext className="right-4" />
-                </>
-              )}
-            </Carousel>
+              </div>
+            )}
+
+            {/* Image Lightbox */}
+            <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+              <DialogContent className="max-w-7xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+                <div className="relative w-full h-full flex items-center justify-center bg-black">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white"
+                    onClick={() => setSelectedImage(null)}
+                  >
+                    <X className="h-6 w-6" />
+                  </Button>
+                  {selectedImage && (
+                    <img 
+                      src={selectedImage} 
+                      alt="Gallery view"
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -258,6 +416,48 @@ const PropertyDetails = () => {
                   </Button>
                 </div>
               )}
+
+              {/* Ratings & Reviews Section */}
+              <div className="border-t pt-8 mt-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                  <h2 className="font-heading font-bold text-2xl sm:text-3xl">Ratings & Reviews</h2>
+                  <Button 
+                    onClick={() => setShowReviewForm(!showReviewForm)}
+                    className="w-full sm:w-auto"
+                  >
+                    <Star className="mr-2 h-4 w-4" />
+                    {showReviewForm ? "Cancel" : "Leave a Review"}
+                  </Button>
+                </div>
+
+                {/* Rating Summary */}
+                <div className="mb-8">
+                  <RatingSummary propertyId={id!} />
+                </div>
+
+                {/* Review Form */}
+                {showReviewForm && (
+                  <Card className="mb-8">
+                    <CardContent className="pt-6">
+                      <h3 className="font-semibold text-lg mb-4">Share Your Experience</h3>
+                      <ReviewForm
+                        propertyId={id!}
+                        onSuccess={() => {
+                          setShowReviewForm(false);
+                          toast.success("Thank you for your review!");
+                        }}
+                        onCancel={() => setShowReviewForm(false)}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Reviews List */}
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">Recent Reviews</h3>
+                  <ReviewList propertyId={id!} />
+                </div>
+              </div>
             </div>
 
             {/* Booking Section */}
@@ -341,51 +541,92 @@ const PropertyDetails = () => {
                         </div>
                       )}
 
-                      <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-primary hover:bg-primary/90"
+                        onClick={() => setShowBookingSuccess(false)}
+                      >
                         Request Booking
                       </Button>
+                      
+                      {showBookingSuccess && ownerContactForBooking && ownerContactForBooking.whatsapp && (
+                        <Button
+                          onClick={handleNotifyOwner}
+                          className="w-full bg-[#25D366] hover:bg-[#20BA5A] text-white mt-3"
+                        >
+                          <MessageCircle className="mr-2 h-4 w-4" />
+                          Send to WhatsApp
+                        </Button>
+                      )}
                     </form>
                   </div>
 
-                  <div className="border-t pt-6">
-                    <h4 className="font-semibold mb-3">Contact Owner</h4>
-                    <div className="flex gap-3">
-                      {property.contact_phone && (
-                        <>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            asChild
-                            className="hover:bg-green-50 hover:border-green-500"
-                          >
-                            <a href={`https://wa.me/${property.contact_phone.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                              <MessageCircle className="h-5 w-5 text-green-600" />
-                            </a>
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            asChild
-                          >
-                            <a href={`tel:${property.contact_phone}`}>
-                              <Phone className="h-5 w-5" />
-                            </a>
-                          </Button>
-                        </>
-                      )}
-                      {property.contact_email && (
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          asChild
-                        >
-                          <a href={`mailto:${property.contact_email}`}>
-                            <Mail className="h-5 w-5" />
-                          </a>
-                        </Button>
-                      )}
+                  {/* Contact Owner Section */}
+                  {partnerContact && partnerContact.show_contacts_publicly && (
+                    <div className="border-t pt-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <User className="h-5 w-5 text-primary" />
+                        <h4 className="font-semibold text-lg">Property Owner</h4>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {/* Owner Name */}
+                        <div>
+                          <p className="text-sm text-muted-foreground">Hosted by</p>
+                          <p className="font-semibold text-lg">{partnerContact.full_name}</p>
+                          {partnerContact.business_name && (
+                            <p className="text-sm text-muted-foreground">{partnerContact.business_name}</p>
+                          )}
+                        </div>
+
+                        {/* Contact Buttons */}
+                        {(partnerContact.phone_number || partnerContact.whatsapp_number) && (
+                          <div className="space-y-2">
+                            <Label className="text-sm">Contact</Label>
+                            <div className="flex gap-2">
+                              {/* WhatsApp button - uses whatsapp_number if available, otherwise phone_number */}
+                              {(partnerContact.whatsapp_number || partnerContact.phone_number) && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  asChild
+                                  className="flex-1 hover:bg-green-50 hover:border-green-500"
+                                >
+                                  <a href={`https://wa.me/${(partnerContact.whatsapp_number || partnerContact.phone_number)?.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
+                                    <MessageCircle className="h-4 w-4 mr-2 text-green-600" />
+                                    WhatsApp
+                                  </a>
+                                </Button>
+                              )}
+                              {/* Call button - uses phone_number */}
+                              {partnerContact.phone_number && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  asChild
+                                  className="flex-1"
+                                >
+                                  <a href={`tel:${partnerContact.phone_number}`}>
+                                    <Phone className="h-4 w-4 mr-2" />
+                                    Call
+                                  </a>
+                                </Button>
+                              )}
+                            </div>
+                            {/* Show both numbers if different */}
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              {partnerContact.phone_number && (
+                                <p>Phone: {partnerContact.phone_number}</p>
+                              )}
+                              {partnerContact.whatsapp_number && partnerContact.whatsapp_number !== partnerContact.phone_number && (
+                                <p>WhatsApp: {partnerContact.whatsapp_number}</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

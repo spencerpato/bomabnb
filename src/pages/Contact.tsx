@@ -140,8 +140,9 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="font-bold mb-1">Email</h3>
-                      <p className="text-muted-foreground">info@bomabnb.com</p>
-                      <p className="text-muted-foreground">support@bomabnb.com</p>
+                      <a href="mailto:patomaich611@gmail.com" className="text-muted-foreground hover:text-primary block">
+                        patomaich611@gmail.com
+                      </a>
                     </div>
                   </div>
 
@@ -150,9 +151,13 @@ const Contact = () => {
                       <Phone className="h-6 w-6 text-accent" />
                     </div>
                     <div>
-                      <h3 className="font-bold mb-1">Phone</h3>
-                      <p className="text-muted-foreground">+254 700 000 000</p>
-                      <p className="text-muted-foreground">+254 711 111 111</p>
+                      <h3 className="font-bold mb-1">Phone / WhatsApp</h3>
+                      <a href="tel:+254703998717" className="text-muted-foreground hover:text-primary block">
+                        +254 703 998 717
+                      </a>
+                      <a href="https://wa.me/0114097160" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary block">
+                        WhatsApp: 0114097160
+                      </a>
                     </div>
                   </div>
 

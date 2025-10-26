@@ -1,0 +1,113 @@
+Property Management Section
+📋 Table Layout
+Property Name	Owner (Partner)	Location	Status	Featured	Bookings	Actions
+
+Each property shows clear ownership and quick management controls.
+
+⚡ Action Buttons per Property
+
+👁️ View Property → Opens property page preview (in modal or new tab).
+
+🌟 Feature / Unfeature Property
+
+Toggles whether a property appears in the “Featured” section of the homepage.
+
+When Featured: button text = “Unfeature” (gold star icon filled).
+
+When Not Featured: button text = “Feature” (outline star icon).
+
+📝 Edit Details → Opens editable property form.
+
+❌ Delete → Confirmation modal before permanent removal.
+
+⚠️ 3. FIXING THE "REMOVE FEATURE" ERROR
+🧩 Likely Cause
+
+The error when unfeaturing a property often comes from:
+
+Missing or invalid property ID or feature reference in the backend.
+
+Trying to update a field (isFeatured, featured_until, etc.) that doesn’t exist or has null constraints.
+
+Improper Supabase rule (Row Level Security) blocking update.
+
+🛠️ What to Check and Fix
+
+Ensure each property in the database has a boolean field, e.g.:
+
+is_featured: boolean DEFAULT false
+
+
+The “Unfeature” action should simply toggle this field to false, not delete any row.
+
+The query or API endpoint for “remove feature” should do:
+
+update properties set is_featured = false where id = property_id;
+
+
+— not delete or unlink.
+
+Ensure the property belongs to a verified partner (Superadmin should still override).
+
+Check Supabase RLS (if enabled):
+
+Admin role should have unrestricted access to update rows.
+
+🌟 4. Featured Properties Section
+📈 Display
+
+List all currently featured properties with badges, partner name, and expiry (if any).
+
+Property Name	Partner	Featured Since	Featured Until	Status	Actions
+
+Actions:
+
+🔽 Unfeature – toggles is_featured to false.
+
+⏱️ Extend Feature Duration (if using expiry system).
+
+👁️ View Property.
+
+When a property is unfeatured, it disappears from this section and from homepage highlights.
+
+🧰 5. Maintenance & Settings
+
+Superadmin can:
+
+Toggle features (e.g. “Disable Partner Registration”)
+
+Post system notices to partner dashboards
+
+Manage promotional banners
+
+View error logs (like failed feature toggles)
+
+Clear cache or refresh listings
+
+📲 Mobile Responsiveness (Admin Dashboard)
+Element	Mobile View
+Tables	Collapse into cards per row with icons for actions
+Action Buttons	Convert to dropdown or three-dot menu
+Sidebar	Collapsible menu triggered by hamburger icon
+Notifications	Slide from top and swipe to dismiss
+Forms	Full-width input fields; sticky submit button
+✅ Overall UI Touches
+
+Action buttons color-coded:
+
+Green → Approve / Activate
+
+Red → Delete / Suspend
+
+Gold → Feature
+
+Blue → Edit / View
+
+Hover or tap tooltips for icons
+
+Confirmation modals for any irreversible action
+
+Real-time toast messages:
+
+“Property successfully unfeatured ✅”
+“Partner suspended 🚫”

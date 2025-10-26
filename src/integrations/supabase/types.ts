@@ -245,6 +245,164 @@ export type Database = {
           },
         ]
       }
+      referrers: {
+        Row: {
+          id: string
+          user_id: string
+          referral_code: string
+          business_name: string | null
+          contact_phone: string | null
+          contact_email: string | null
+          status: Database["public"]["Enums"]["partner_status"]
+          approved_at: string | null
+          approved_by: string | null
+          commission_rate: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          referral_code: string
+          business_name?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
+          status?: Database["public"]["Enums"]["partner_status"]
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          referral_code?: string
+          business_name?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
+          status?: Database["public"]["Enums"]["partner_status"]
+          approved_at?: string | null
+          approved_by?: string | null
+          commission_rate?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          id: string
+          referrer_id: string
+          partner_id: string
+          referred_at: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          referrer_id: string
+          partner_id: string
+          referred_at?: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          referrer_id?: string
+          partner_id?: string
+          referred_at?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "referrers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commissions: {
+        Row: {
+          id: string
+          referrer_id: string
+          booking_id: string
+          partner_id: string
+          property_id: string
+          booking_amount: string
+          commission_rate: string
+          commission_amount: string
+          status: string
+          paid_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          referrer_id: string
+          booking_id: string
+          partner_id: string
+          property_id: string
+          booking_amount: string
+          commission_rate: string
+          commission_amount: string
+          status?: string
+          paid_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          referrer_id?: string
+          booking_id?: string
+          partner_id?: string
+          property_id?: string
+          booking_amount?: string
+          commission_rate?: string
+          commission_amount?: string
+          status?: string
+          paid_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "referrers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -280,7 +438,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "partner" | "user"
+      app_role: "admin" | "partner" | "user" | "referrer"
       partner_status: "pending" | "active" | "rejected" | "suspended"
       property_type:
         | "apartment"
@@ -416,7 +574,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "partner", "user"],
+      app_role: ["admin", "partner", "user", "referrer"],
       partner_status: ["pending", "active", "rejected", "suspended"],
       property_type: [
         "apartment",
