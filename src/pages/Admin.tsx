@@ -113,13 +113,27 @@ const Admin = () => {
       const featuredListings = properties.filter((p) => p.is_featured).length;
       const activeAgents = agents.filter((a) => a.status === "active").length;
       const totalReferredPartners = referrals.filter((r) => r.status === "active").length;
-      const totalCommissionPayouts = commissions.reduce((sum, c) => sum + parseFloat(c.commission_amount), 0);
+      
+      // Calculate system commission (15% of confirmed bookings)
+      const SYSTEM_COMMISSION_RATE = 0.15;
+      const confirmedBookings = bookings.filter((b) => b.status === "confirmed");
+      const revenueGenerated = confirmedBookings.reduce(
+        (sum, b) => sum + (Number(b.total_price) * SYSTEM_COMMISSION_RATE), 
+        0
+      );
+      
+      // Calculate total agent commission payouts (10% of confirmed bookings)
+      const AGENT_COMMISSION_RATE = 0.10;
+      const totalCommissionPayouts = confirmedBookings.reduce(
+        (sum, b) => sum + (Number(b.total_price) * AGENT_COMMISSION_RATE), 
+        0
+      );
 
       setStats({
         totalPartners: partners.length,
         totalProperties: properties.length,
         totalBookings: bookings.length,
-        revenueGenerated: featureRequests.filter((f) => f.status === "approved").length * 5000,
+        revenueGenerated,
         featuredListings,
         pendingApprovals: pendingPartners + pendingListings + pendingAgents,
         systemAlerts: 0,

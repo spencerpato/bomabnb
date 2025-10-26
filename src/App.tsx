@@ -40,6 +40,12 @@ import ReferrerLink from "./pages/ReferrerLink";
 import ReferrerReferrals from "./pages/ReferrerReferrals";
 import ReferrerCommissions from "./pages/ReferrerCommissions";
 import AgentDashboard from "./pages/AgentDashboard";
+import AgentReferrals from "./pages/AgentReferrals";
+import AgentReferralLink from "./pages/AgentReferralLink";
+import AgentCommissions from "./pages/AgentCommissions";
+import AgentProfile from "./pages/AgentProfile";
+import PartnerPendingApproval from "./pages/PartnerPendingApproval";
+import AdminAgentPayments from "./pages/AdminAgentPayments";
 
 const queryClient = new QueryClient();
 
@@ -54,11 +60,13 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/admin-login" element={<AdminLogin />} />
       <Route path="/partner-register" element={<PartnerRegister />} />
+      <Route path="/partner-pending-approval" element={<PartnerPendingApproval />} />
       <Route path="/partner-dashboard" element={<PartnerDashboard />} />
       <Route path="/partner-profile" element={<PartnerProfile />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/admin/partners" element={<AdminPartners />} />
       <Route path="/admin/agents" element={<AdminAgents />} />
+      <Route path="/admin/agent-payments" element={<AdminAgentPayments />} />
       <Route path="/admin/properties" element={<AdminProperties />} />
       <Route path="/admin/bookings" element={<AdminBookings />} />
       <Route path="/admin/featured-requests" element={<AdminFeaturedRequests />} />
@@ -84,14 +92,14 @@ const AppRoutes = () => {
       <Route path="/referrer-referrals" element={<ReferrerReferrals />} />
       <Route path="/referrer-commissions" element={<ReferrerCommissions />} />
       
-      {/* Agent Routes - Using referrer pages as agents and referrers are the same */}
+      {/* Agent Routes - Dedicated agent components with AgentLayout */}
       <Route path="/agent-dashboard" element={<AgentDashboard />} />
-      <Route path="/agent-profile" element={<PartnerProfile />} />
-      <Route path="/agent-referral" element={<ReferrerLink />} />
-      <Route path="/agent-referrals" element={<ReferrerReferrals />} />
+      <Route path="/agent-profile" element={<AgentProfile />} />
+      <Route path="/agent-referral" element={<AgentReferralLink />} />
+      <Route path="/agent-referrals" element={<AgentReferrals />} />
+      <Route path="/agent-commissions" element={<AgentCommissions />} />
       <Route path="/agent-properties" element={<PartnerListings />} />
       <Route path="/agent-bookings" element={<PartnerBookings />} />
-      <Route path="/agent-commissions" element={<ReferrerCommissions />} />
       <Route path="/agent-notifications" element={<PartnerNotifications />} />
       <Route path="/agent-support" element={<PartnerSupport />} />
       <Route path="/agent-settings" element={<PartnerSettings />} />
