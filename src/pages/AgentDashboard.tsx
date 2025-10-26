@@ -87,52 +87,122 @@ const AgentDashboard = () => {
 
   const fetchStats = async (referrerId: string) => {
     try {
+      console.log("=== FETCHING STATS FOR REFERRER:", referrerId, "===");
+      
       // @ts-expect-error - Supabase types need regeneration to include referrals table
-      const { data: referrals } = await supabase
+      const { data: referrals, error: referralsError } = await supabase
         .from("referrals")
         .select("*, partners(id, status)")
         .eq("referrer_id", referrerId);
 
-      // @ts-expect-error - Type assertion needed
-      const activePartners = referrals?.filter(r => r.partners?.status === "active").length || 0;
+      console.log("1. REFERRALS FOUND:", referrals?.length || 0);
+      console.log("   Referrals data:", referrals);
+
+      if (referralsError) {
+        console.error("Error fetching referrals:", referralsError);
+        throw referralsError;
+      }
 
       // @ts-expect-error - Type assertion needed
-      const partnerIds = referrals?.map(r => r.partner_id) || [];
+      const activePartners = referrals?.filter(r => r.partners?.status === "active").length || 0;
+      console.log("2. ACTIVE PARTNERS:", activePartners);
+
+      // @ts-expect-error - Type assertion needed
+      const partnerIds = referrals?.map(r => r.partner_id).filter(id => id) || [];
+      console.log("3. PARTNER IDs:", partnerIds);
 
       let totalProperties = 0;
       let totalBookings = 0;
+      let totalCommissions = 0;
+      let pendingCommissions = 0;
 
       if (partnerIds.length > 0) {
-        const { data: properties } = await supabase
+        const { data: properties, error: propertiesError } = await supabase
           .from("properties")
-          .select("id")
+          .select("id, partner_id")
           .in("partner_id", partnerIds);
+
+        console.log("4. PROPERTIES FOUND:", properties?.length || 0);
+        console.log("   Properties data:", properties);
+
+        if (propertiesError) {
+          console.error("Error fetching properties:", propertiesError);
+        }
 
         totalProperties = properties?.length || 0;
 
         if (properties && properties.length > 0) {
           const propertyIds = properties.map(p => p.id);
-          const { data: bookings } = await supabase
+          console.log("5. PROPERTY IDs TO SEARCH:", propertyIds);
+          
+          const { data: bookings, error: bookingsError } = await supabase
             .from("bookings")
-            .select("id")
+            .select("id, total_price, status, property_id")
             .in("property_id", propertyIds);
 
-          totalBookings = bookings?.length || 0;
+          console.log("6. BOOKINGS QUERY RESULT:");
+          console.log("   Bookings found:", bookings?.length || 0);
+          console.log("   Bookings data:", bookings);
+          
+          // Double check - fetch ALL bookings to see if any exist
+          const { data: allBookings } = await supabase
+            .from("bookings")
+            .select("id, property_id, status, total_price")
+            .limit(10);
+          console.log("7. ALL BOOKINGS IN DATABASE (first 10):", allBookings);
+          console.log("   Checking if any match our property IDs:", propertyIds);
+
+          if (bookingsError) {
+            console.error("Error fetching bookings:", bookingsError);
+          }
+
+          // Calculate agent commission (10% of confirmed bookings)
+          const AGENT_COMMISSION_RATE = 0.10;
+          const confirmedBookings = bookings?.filter(b => b.status === "confirmed") || [];
+          const pendingBookings = bookings?.filter(b => b.status === "pending") || [];
+          
+          // Total bookings = only confirmed bookings
+          totalBookings = confirmedBookings.length;
+          
+          console.log("=== Agent Commission Debug ===");
+          console.log("All bookings found:", bookings?.length || 0);
+          console.log("Confirmed bookings (counted):", confirmedBookings.length);
+          console.log("Pending bookings:", pendingBookings.length);
+          console.log("Bookings data:", bookings);
+          
+          // Total commission = 10% of all confirmed booking amounts
+          totalCommissions = confirmedBookings.reduce((sum, b) => {
+            const commission = Number(b.total_price) * AGENT_COMMISSION_RATE;
+            console.log(`Booking ${b.id}: KES ${b.total_price} → Commission: KES ${commission}`);
+            return sum + commission;
+          }, 0);
+          
+          console.log("Total bookings (confirmed only):", totalBookings);
+          console.log("Total commissions (10%):", totalCommissions);
+          console.log("==============================");
         }
       }
 
-      // @ts-expect-error - Supabase types need regeneration to include commissions table
-      const { data: commissions } = await supabase
-        .from("commissions")
-        .select("commission_amount, status")
+      // Fetch total amount already paid to this agent
+      // @ts-expect-error - agent_payments table not in generated types yet
+      const { data: payoutData, error: payoutError } = await supabase
+        .from("agent_payments")
+        .select("amount")
         .eq("referrer_id", referrerId);
 
-      // @ts-expect-error - Type assertion needed
-      const totalCommissions = commissions?.reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0;
-      // @ts-expect-error - Type assertion needed
-      const pendingCommissions = commissions
-        ?.filter(c => c.status === "pending")
-        .reduce((sum, c) => sum + Number(c.commission_amount), 0) || 0;
+      if (payoutError) {
+        console.log("Note: agent_payments table not found yet. Pending = Total");
+      }
+
+      const totalPaid = payoutData?.reduce((sum: number, p: any) => sum + Number(p.amount), 0) || 0;
+      
+      // Pending commission = Total earnings - Amount already paid
+      pendingCommissions = totalCommissions - totalPaid;
+
+      console.log("💰 PAYOUT CALCULATION:");
+      console.log("   Total Commissions Earned:", totalCommissions);
+      console.log("   Total Already Paid:", totalPaid);
+      console.log("   Pending Commission:", pendingCommissions);
 
       setStats({
         totalReferrals: referrals?.length || 0,
@@ -148,7 +218,7 @@ const AgentDashboard = () => {
   };
 
   const getReferralLink = () => {
-    return `${window.location.origin}/register?ref=${referralCode}`;
+    return `${window.location.origin}/partner-register?ref=${referralCode}`;
   };
 
   const copyReferralLink = () => {
@@ -287,40 +357,35 @@ const AgentDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks for agents</CardDescription>
+            <CardDescription>Manage your referrals and earnings</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Button
+              variant="outline"
+              className="h-auto py-6 flex flex-col items-center gap-2"
+              onClick={copyReferralLink}
+            >
+              <Share2 className="h-6 w-6 text-amber-600" />
+              <span className="text-sm font-medium">Copy Referral Link</span>
+              <span className="text-xs text-muted-foreground">Share with partners</span>
+            </Button>
             <Button
               variant="outline"
               className="h-auto py-6 flex flex-col items-center gap-2"
               onClick={() => navigate("/agent-referrals")}
             >
-              <Users className="h-6 w-6" />
-              <span className="text-sm">View Referrals</span>
+              <Users className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium">View My Referrals</span>
+              <span className="text-xs text-muted-foreground">{stats.totalReferrals} partners</span>
             </Button>
             <Button
               variant="outline"
               className="h-auto py-6 flex flex-col items-center gap-2"
               onClick={() => navigate("/agent-commissions")}
             >
-              <DollarSign className="h-6 w-6" />
-              <span className="text-sm">View Commissions</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto py-6 flex flex-col items-center gap-2"
-              onClick={() => navigate("/agent-properties")}
-            >
-              <Building2 className="h-6 w-6" />
-              <span className="text-sm">Referred Properties</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-auto py-6 flex flex-col items-center gap-2"
-              onClick={copyReferralLink}
-            >
-              <Share2 className="h-6 w-6" />
-              <span className="text-sm">Copy Referral Link</span>
+              <DollarSign className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium">View Commissions</span>
+              <span className="text-xs text-muted-foreground">KSh {stats.totalCommissions.toFixed(0)}</span>
             </Button>
           </CardContent>
         </Card>

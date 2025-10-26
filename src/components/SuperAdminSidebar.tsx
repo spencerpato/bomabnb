@@ -23,6 +23,7 @@ import {
   Mail,
   MessageSquare,
   UserCog,
+  Wallet,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -115,6 +116,12 @@ export const SuperAdminSidebar = ({ onClose }: SuperAdminSidebarProps) => {
       label: "Agent Management",
       path: "/admin/agents",
       description: "Manage agent/referrer accounts",
+    },
+    {
+      icon: Wallet,
+      label: "Agent Payments",
+      path: "/admin/agent-payments",
+      description: "Commission & payout management",
     },
     {
       icon: Home,

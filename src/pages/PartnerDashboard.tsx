@@ -99,6 +99,8 @@ const PartnerDashboard = () => {
     pendingApproval: 0,
     totalBookings: 0,
     totalEarnings: 0,
+    systemCommission: 0,
+    netRevenue: 0,
     featuredProperties: 0,
   });
 
@@ -152,6 +154,13 @@ const PartnerDashboard = () => {
         .single();
 
       if (partnerError) throw partnerError;
+      
+      // Check if partner is approved
+      if (partnerData.status !== "active") {
+        navigate("/partner-pending-approval");
+        return;
+      }
+
       setPartner(partnerData);
 
       // Fetch all data
@@ -223,14 +232,20 @@ const PartnerDashboard = () => {
       if (error) throw error;
       setBookings(bookingsData || []);
 
-      // Calculate earnings
+      // Calculate earnings and commission
       const confirmedBookings = bookingsData?.filter((b) => b.status === "confirmed") || [];
+      const SYSTEM_COMMISSION_RATE = 0.15; // 15% platform fee
+      
       const totalEarnings = confirmedBookings.reduce((sum, b) => sum + Number(b.total_price), 0);
+      const systemCommission = totalEarnings * SYSTEM_COMMISSION_RATE;
+      const netRevenue = totalEarnings - systemCommission; // Partner keeps 85%
 
       setStats((prev) => ({
         ...prev,
         totalBookings: bookingsData?.length || 0,
         totalEarnings,
+        systemCommission,
+        netRevenue,
       }));
     } catch (error) {
       console.error("Error fetching bookings:", error);
@@ -511,12 +526,34 @@ const PartnerDashboard = () => {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-              <DollarSign className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Gross Revenue</CardTitle>
+              <DollarSign className="h-5 w-5 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">KES {stats.totalEarnings.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground mt-1">From confirmed bookings</p>
+              <div className="text-2xl font-bold text-blue-600">KES {stats.totalEarnings.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Total from confirmed bookings</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-orange-200 bg-orange-50/50 dark:bg-orange-950/20">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Platform Commission</CardTitle>
+              <AlertCircle className="h-5 w-5 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">-KES {stats.systemCommission.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+              <p className="text-xs text-muted-foreground mt-1">15% platform fee</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Your Net Revenue</CardTitle>
+              <TrendingUp className="h-5 w-5 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">KES {stats.netRevenue.toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+              <p className="text-xs text-muted-foreground mt-1">You keep 85%</p>
             </CardContent>
           </Card>
 

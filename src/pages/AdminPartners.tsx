@@ -51,6 +51,14 @@ interface Partner {
     phone_number?: string;
   };
   properties_count?: number;
+  referrer_info?: {
+    referrer_id: string;
+    business_name: string | null;
+    referral_code: string;
+    profiles: {
+      full_name: string;
+    };
+  } | null;
 }
 
 const AdminPartners = () => {
@@ -125,10 +133,45 @@ const AdminPartners = () => {
             .select("id", { count: "exact" })
             .eq("partner_id", partner.id);
 
+          // @ts-expect-error - Supabase types need regeneration to include referrals table
+          const { data: referralData } = await supabase
+            .from("referrals")
+            .select(`
+              referrer_id,
+              referrers (
+                id,
+                business_name,
+                referral_code,
+                user_id
+              )
+            `)
+            .eq("partner_id", partner.id)
+            .eq("status", "active")
+            .single();
+
+          let referrerInfo = null;
+          if (referralData && referralData.referrers) {
+            const { data: referrerProfile } = await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", referralData.referrers.user_id)
+              .single();
+
+            referrerInfo = {
+              referrer_id: referralData.referrer_id,
+              business_name: referralData.referrers.business_name,
+              referral_code: referralData.referrers.referral_code,
+              profiles: {
+                full_name: referrerProfile?.full_name || "Unknown Agent",
+              },
+            };
+          }
+
           return {
             ...partner,
             profiles: profile || { full_name: "", email: "", phone_number: "" },
             properties_count: propertiesData?.length || 0,
+            referrer_info: referrerInfo,
           };
         })
       );
@@ -409,7 +452,7 @@ const AdminPartners = () => {
                     <th className="text-left p-4 font-semibold">Partner Name</th>
                     <th className="text-left p-4 font-semibold">Business Name</th>
                     <th className="text-left p-4 font-semibold">Email</th>
-                    <th className="text-left p-4 font-semibold">Phone</th>
+                    <th className="text-left p-4 font-semibold">Referred By</th>
                     <th className="text-left p-4 font-semibold">Status</th>
                     <th className="text-left p-4 font-semibold">Joined On</th>
                     <th className="text-left p-4 font-semibold">Actions</th>
@@ -432,7 +475,16 @@ const AdminPartners = () => {
                           <span data-testid={`text-email-${partner.id}`}>{partner.profiles.email}</span>
                         </div>
                       </td>
-                      <td className="p-4" data-testid={`text-phone-${partner.id}`}>{partner.profiles.phone_number || "N/A"}</td>
+                      <td className="p-4" data-testid={`text-referrer-${partner.id}`}>
+                        {partner.referrer_info ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium text-sm">{partner.referrer_info.profiles.full_name}</span>
+                            <span className="text-xs text-muted-foreground">Code: {partner.referrer_info.referral_code}</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">Direct</span>
+                        )}
+                      </td>
                       <td className="p-4">{getStatusBadge(partner.status)}</td>
                       <td className="p-4 text-sm" data-testid={`text-joined-${partner.id}`}>
                         {new Date(partner.created_at).toLocaleDateString()}
@@ -551,6 +603,13 @@ const AdminPartners = () => {
                             <span className="text-muted-foreground">Joined: </span>
                             {new Date(partner.created_at).toLocaleDateString()}
                           </div>
+                          {partner.referrer_info && (
+                            <div>
+                              <span className="text-muted-foreground">Referred By: </span>
+                              <span className="font-medium">{partner.referrer_info.profiles.full_name}</span>
+                              <span className="text-xs text-muted-foreground ml-1">({partner.referrer_info.referral_code})</span>
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex flex-wrap gap-2 pt-2">
@@ -685,6 +744,24 @@ const AdminPartners = () => {
                 <p className="text-sm font-medium text-muted-foreground">Registered On</p>
                 <p>{new Date(selectedPartner.created_at).toLocaleString()}</p>
               </div>
+              {selectedPartner.referrer_info && (
+                <>
+                  <div className="col-span-2 pt-4 border-t">
+                    <p className="text-sm font-medium text-muted-foreground mb-2">🤝 Referral Information</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Referred By (Agent)</p>
+                    <p className="font-semibold">{selectedPartner.referrer_info.profiles.full_name}</p>
+                    {selectedPartner.referrer_info.business_name && (
+                      <p className="text-sm text-muted-foreground">{selectedPartner.referrer_info.business_name}</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Agent Referral Code</p>
+                    <p className="font-mono text-primary font-semibold">{selectedPartner.referrer_info.referral_code}</p>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </DialogContent>

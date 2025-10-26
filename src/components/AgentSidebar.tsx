@@ -7,15 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Home,
   User,
-  Building2,
-  Calendar,
   DollarSign,
-  Bell,
-  MessageCircle,
-  Settings,
   LogOut,
   Users,
   Share2,
+  Menu,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -102,63 +98,33 @@ export const AgentSidebar = ({ onClose }: AgentSidebarProps) => {
   const navItems = [
     {
       icon: Home,
-      label: "Dashboard Overview",
+      label: "Dashboard",
       path: "/agent-dashboard",
-      description: "Summary & earnings",
-    },
-    {
-      icon: User,
-      label: "My Profile",
-      path: "/agent-profile",
-      description: "Edit your information",
+      description: "Overview & stats",
     },
     {
       icon: Share2,
-      label: "My Referral Code",
+      label: "My Referral Link",
       path: "/agent-referral",
-      description: "Share your code",
+      description: "Share & earn commissions",
     },
     {
       icon: Users,
-      label: "Referred Partners",
+      label: "My Referrals",
       path: "/agent-referrals",
-      description: "View your referrals",
-    },
-    {
-      icon: Building2,
-      label: "Referred Properties",
-      path: "/agent-properties",
-      description: "Properties from referrals",
-    },
-    {
-      icon: Calendar,
-      label: "Bookings",
-      path: "/agent-bookings",
-      description: "All bookings from referrals",
+      description: "Referred partners",
     },
     {
       icon: DollarSign,
-      label: "Commissions",
+      label: "Commissions & Payouts",
       path: "/agent-commissions",
-      description: "Earnings & payouts",
+      description: "Earnings & withdrawals",
     },
     {
-      icon: Bell,
-      label: "Notifications",
-      path: "/agent-notifications",
-      description: "Updates & alerts",
-    },
-    {
-      icon: MessageCircle,
-      label: "Support / Help",
-      path: "/agent-support",
-      description: "Get assistance",
-    },
-    {
-      icon: Settings,
-      label: "Settings",
-      path: "/agent-settings",
-      description: "Preferences",
+      icon: User,
+      label: "Profile Settings",
+      path: "/agent-profile",
+      description: "Edit account info",
     },
   ];
 
@@ -213,23 +179,24 @@ export const AgentSidebar = ({ onClose }: AgentSidebarProps) => {
             const active = isActive(item.path);
 
             return (
-              <button
+              <Button
                 key={item.path}
+                variant={active ? "default" : "ghost"}
                 onClick={() => {
                   navigate(item.path);
                   onClose?.();
                 }}
                 className={`
-                  w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all
+                  w-full justify-start h-auto py-3 px-4
                   ${
                     active
-                      ? "bg-amber-600 text-white shadow-md border-l-4 border-amber-700"
-                      : "hover:bg-muted text-foreground"
+                      ? "bg-amber-600 hover:bg-amber-700 text-white shadow-md"
+                      : "hover:bg-muted"
                   }
                 `}
               >
-                <Icon className={`h-5 w-5 ${active ? "scale-110" : ""}`} />
-                <div className="flex-1 min-w-0">
+                <Icon className={`h-5 w-5 mr-3 flex-shrink-0 ${active ? "scale-110" : ""}`} />
+                <div className="flex-1 min-w-0 text-left">
                   <p className={`text-sm font-medium ${active ? "font-bold" : ""}`}>
                     {item.label}
                   </p>
@@ -237,7 +204,7 @@ export const AgentSidebar = ({ onClose }: AgentSidebarProps) => {
                     {item.description}
                   </p>
                 </div>
-              </button>
+              </Button>
             );
           })}
         </nav>
@@ -286,7 +253,7 @@ export const MobileAgentSidebar = () => {
           size="icon"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          <Home className="h-6 w-6" />
+          <Menu className="h-6 w-6" />
         </Button>
       </div>
 
