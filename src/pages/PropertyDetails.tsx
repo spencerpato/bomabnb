@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import RatingSummary from "@/components/reviews/RatingSummary";
 import ReviewList from "@/components/reviews/ReviewList";
 import ReviewForm from "@/components/reviews/ReviewForm";
+import { generatePropertySchema, generateBreadcrumbSchema } from "@/utils/structuredData";
 
 interface Property {
   id: string;
@@ -268,8 +270,37 @@ const PropertyDetails = () => {
     return null;
   }
 
+  const propertySchema = generatePropertySchema({
+    id: property.id,
+    property_name: property.property_name,
+    description: property.description,
+    location: property.location,
+    price_per_night: property.price_per_night,
+    featured_image: property.featured_image,
+    max_guests_per_unit: property.max_guests_per_unit,
+    amenities: property.amenities,
+  });
+
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: "https://bomabnb.netlify.app" },
+    { name: "Properties", url: "https://bomabnb.netlify.app" },
+    { name: property.property_name, url: `https://bomabnb.netlify.app/property/${property.id}` }
+  ]);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title={`${property.property_name} - ${property.location}`}
+        description={property.description || `Book ${property.property_name} in ${property.location}. KES ${property.price_per_night}/night. Up to ${property.max_guests_per_unit} guests. ${property.amenities.join(', ')}`}
+        keywords={`${property.location} accommodation, ${property.property_name}, Kenya homestay, ${property.property_type}, ${property.amenities.join(', ')}`}
+        url={`https://bomabnb.netlify.app/property/${property.id}`}
+        image={property.featured_image}
+        type="product"
+        price={property.price_per_night}
+        currency="KES"
+        availability="instock"
+        structuredData={[propertySchema, breadcrumbSchema]}
+      />
       <Navigation />
 
       <div className="flex-1 px-4 py-8">

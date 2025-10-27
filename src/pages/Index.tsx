@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { PropertyCard } from "@/components/PropertyCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { FeaturedCarousel } from "@/components/FeaturedCarousel";
+import { SEO } from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, DollarSign, Star, SlidersHorizontal } from "lucide-react";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { generateWebsiteSchema, generateOrganizationSchema } from "@/utils/structuredData";
 
 interface Property {
   id: string;
@@ -255,8 +257,20 @@ const Index = () => {
     navigate(`/property/${id}`);
   };
 
+  const websiteSchema = generateWebsiteSchema();
+  const orgSchema = generateOrganizationSchema();
+  
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEO
+        title="BomaBnB - Authentic Kenyan Homestays & Airbnbs"
+        description="Discover verified Kenyan Airbnbs and homestays hosted by locals. Experience authentic Kenyan hospitality with comfort, culture, and competitive rates."
+        keywords="Kenya homestays, Kenya Airbnb, Kenyan accommodation, vacation rentals Kenya, Nairobi rentals, Mombasa stays, Kenya tourism"
+        url="https://bomabnb.netlify.app"
+        image="https://bomabnb.netlify.app/og-image.jpg"
+        type="website"
+        structuredData={[websiteSchema, orgSchema]}
+      />
       <Navigation />
 
       {/* Hero Carousel Section - Responsive */}

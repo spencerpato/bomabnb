@@ -1,14 +1,27 @@
-User-agent: Googlebot
+# BomaBnB - Robots.txt
+# Allow all crawlers
+
+User-agent: *
 Allow: /
 
-User-agent: Bingbot
-Allow: /
+# Disallow admin and partner areas from search engines
+Disallow: /admin-dashboard
+Disallow: /partner-dashboard
+Disallow: /agent-dashboard
+Disallow: /auth
 
+# Allow social media crawlers for link previews
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
+User-agent: LinkedInBot
 Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Sitemap location
+Sitemap: https://bomabnb.netlify.app/sitemap.xml
