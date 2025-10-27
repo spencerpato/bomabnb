@@ -343,16 +343,11 @@ const Index = () => {
         return featuredProperties.length > 0 ? (
           <section className="py-8 px-3 md:px-4 bg-gradient-to-r from-yellow-50/50 to-orange-50/50 dark:from-yellow-950/10 dark:to-orange-950/10">
             <div className="container mx-auto max-w-7xl">
-              <div className="flex items-center justify-between mb-4 px-2">
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 md:h-6 md:w-6 text-yellow-500 fill-current" />
-                  <h2 className="font-heading font-bold text-xl md:text-2xl text-foreground">
-                    Featured Properties 🌟
-                  </h2>
-                </div>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  Rotates every 8 seconds
-                </p>
+              <div className="flex items-center gap-2 mb-4 px-2">
+                <Star className="h-5 w-5 md:h-6 md:w-6 text-yellow-500 fill-current" />
+                <h2 className="font-heading font-bold text-xl md:text-2xl text-foreground">
+                  Featured Properties 🌟
+                </h2>
               </div>
               
               <FeaturedCarousel autoRotateInterval={8000}>
