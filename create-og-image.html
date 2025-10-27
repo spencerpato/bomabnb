@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create OG Image for BomaBnB</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .canvas-container {
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            display: inline-block;
+        }
+        #ogCanvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        input, button {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .info {
+            background: #e0f2fe;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 BomaBnB OG Image Creator</h1>
+        
+        <div class="info">
+            <strong>Instructions:</strong><br>
+            1. Click "Load Logo" to load your bomabnb-logo.png<br>
+            2. Adjust the text if needed<br>
+            3. Click "Download OG Image" to save as og-image.jpg<br>
+            4. Place the downloaded file in your <code>public</code> folder
+        </div>
+
+        <div class="controls">
+            <input type="file" id="logoInput" accept="image/*">
+            <button onclick="loadLogo()">Load Logo</button>
+            <br>
+            <input type="text" id="titleText" value="BomaBnB" placeholder="Main Title" style="width: 300px;">
+            <br>
+            <input type="text" id="subtitleText" value="Authentic Kenyan Homestays & Airbnbs" placeholder="Subtitle" style="width: 400px;">
+            <br>
+            <button onclick="generateImage()">Generate Image</button>
+            <button onclick="downloadImage()">Download OG Image</button>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="ogCanvas" width="1200" height="630"></canvas>
+        </div>
+
+        <p><strong>Image Size:</strong> 1200 x 630 pixels (Perfect for WhatsApp, Facebook, Twitter)</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('ogCanvas');
+        const ctx = canvas.getContext('2d');
+        let logoImg = null;
+
+        // Draw initial background
+        drawBackground();
+
+        function drawBackground() {
+            // Gradient background (gold to green - Kenya colors)
+            const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+            gradient.addColorStop(0, '#f59e0b');  // Gold
+            gradient.addColorStop(1, '#059669');  // Green
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1200, 630);
+
+            // Add some decorative elements
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(1000, 100, 200, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(200, 500, 150, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0;
+        }
+
+        function loadLogo() {
+            const input = document.getElementById('logoInput');
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoImg = new Image();
+                    logoImg.onload = function() {
+                        generateImage();
+                    };
+                    logoImg.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please select a logo file first!');
+            }
+        }
+
+        function generateImage() {
+            // Clear canvas
+            drawBackground();
+
+            const title = document.getElementById('titleText').value;
+            const subtitle = document.getElementById('subtitleText').value;
+
+            // Draw logo if loaded
+            if (logoImg) {
+                const logoSize = 250;
+                const logoX = (1200 - logoSize) / 2;
+                const logoY = 100;
+                
+                // Draw white circle background for logo
+                ctx.fillStyle = 'white';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 20;
+                ctx.shadowOffsetY = 10;
+                ctx.beginPath();
+                ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2 + 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+                
+                ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+            }
+
+            // Draw title
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 72px Arial';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.shadowBlur = 10;
+            ctx.fillText(title, 600, 450);
+
+            // Draw subtitle
+            ctx.font = '36px Arial';
+            ctx.fillText(subtitle, 600, 520);
+            ctx.shadowColor = 'transparent';
+
+            // Draw small text at bottom
+            ctx.font = '24px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillText('bomabnb.netlify.app', 600, 580);
+        }
+
+        function downloadImage() {
+            // Convert canvas to blob and download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'og-image.jpg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('✅ og-image.jpg downloaded! Now place it in your public folder.');
+            }, 'image/jpeg', 0.95);
+        }
+
+        // Generate initial preview without logo
+        generateImage();
+    </script>
+</body>
+</html>

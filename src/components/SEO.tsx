@@ -17,7 +17,7 @@ export const SEO = ({
   title = "BomaBnB - Authentic Kenyan Homestays & Airbnbs",
   description = "Discover verified Kenyan Airbnbs and homestays hosted by locals. Experience authentic Kenyan hospitality with comfort, culture, and competitive rates directly from property owners.",
   keywords = "Kenya homestays, Kenya Airbnb, Kenyan accommodation, vacation rentals Kenya, Nairobi rentals, Mombasa stays, Kenya tourism, local hosts Kenya, verified properties Kenya",
-  image = "https://bomabnb.netlify.app/bomabnb-logo.png",
+  image = "https://bomabnb.netlify.app/og-image.jpg",
   url = "https://bomabnb.netlify.app",
   type = "website",
   price,
