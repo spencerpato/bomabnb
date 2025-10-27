@@ -267,7 +267,7 @@ const Index = () => {
         description="Discover verified Kenyan Airbnbs and homestays hosted by locals. Experience authentic Kenyan hospitality with comfort, culture, and competitive rates."
         keywords="Kenya homestays, Kenya Airbnb, Kenyan accommodation, vacation rentals Kenya, Nairobi rentals, Mombasa stays, Kenya tourism"
         url="https://bomabnb.netlify.app"
-        image="https://bomabnb.netlify.app/og-image.jpg"
+        image="https://bomabnb.netlify.app/bomabnb-logo.png"
         type="website"
         structuredData={[websiteSchema, orgSchema]}
       />
