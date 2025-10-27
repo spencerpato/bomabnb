@@ -355,11 +355,11 @@ const AgentDashboard = () => {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Manage your referrals and earnings</CardDescription>
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-lg md:text-xl">Quick Actions</CardTitle>
+            <CardDescription className="text-sm">Manage your referrals and earnings</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <CardContent className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 md:p-6">
             <Button
               variant="outline"
               className="h-auto py-6 flex flex-col items-center gap-2"

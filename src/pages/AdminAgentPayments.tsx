@@ -404,11 +404,11 @@ const AdminAgentPayments = () => {
 
   return (
     <SuperAdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6 p-2 md:p-0">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Agent Payment Management</h1>
-            <p className="text-muted-foreground mt-2">
+            <h1 className="text-2xl md:text-3xl font-bold">Agent Payment Management</h1>
+            <p className="text-sm md:text-base text-muted-foreground mt-1 md:mt-2">
               Manage agent commissions and process payments
             </p>
           </div>
@@ -416,7 +416,7 @@ const AdminAgentPayments = () => {
 
         {/* Search */}
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 md:pt-6 p-4 md:p-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -430,25 +430,25 @@ const AdminAgentPayments = () => {
         </Card>
 
         {/* Stats Overview */}
-        <div className="grid gap-6 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">Total Agents</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{agents.length}</div>
+            <CardContent className="p-4 md:p-6">
+              <div className="text-xl md:text-2xl font-bold">{agents.length}</div>
               <p className="text-xs text-muted-foreground">Active referrers</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">Total Earned</CardTitle>
               <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-xl md:text-2xl font-bold text-green-600">
                 KES {agents.reduce((sum, a) => sum + a.totalEarnings, 0).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">All-time commissions</p>
@@ -456,12 +456,12 @@ const AdminAgentPayments = () => {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Pending</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">Total Pending</CardTitle>
               <Clock className="h-4 w-4 text-amber-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-600">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-xl md:text-2xl font-bold text-amber-600">
                 KES {agents.reduce((sum, a) => sum + a.pendingPayment, 0).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Awaiting payment</p>
@@ -469,12 +469,12 @@ const AdminAgentPayments = () => {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between pb-2 p-4 md:p-6">
+              <CardTitle className="text-xs md:text-sm font-medium">Total Paid</CardTitle>
               <CheckCircle className="h-4 w-4 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
+            <CardContent className="p-4 md:p-6">
+              <div className="text-xl md:text-2xl font-bold text-blue-600">
                 KES {agents.reduce((sum, a) => sum + a.totalPaid, 0).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Successfully paid</p>
@@ -484,11 +484,11 @@ const AdminAgentPayments = () => {
 
         {/* Agents List */}
         <Card>
-          <CardHeader>
-            <CardTitle>Agents</CardTitle>
-            <CardDescription>View and manage agent payments</CardDescription>
+          <CardHeader className="p-4 md:p-6">
+            <CardTitle className="text-lg md:text-xl">Agents</CardTitle>
+            <CardDescription className="text-sm">View and manage agent payments</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 md:p-6">
             {isLoading ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Loading agents...</p>
@@ -499,38 +499,39 @@ const AdminAgentPayments = () => {
                 <p className="text-muted-foreground">No agents found</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 md:space-y-4">
                 {filteredAgents.map((agent) => (
                   <Card key={agent.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
+                    <CardContent className="p-3 md:p-4">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-lg">{agent.profiles.full_name}</h3>
+                          <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2">
+                            <h3 className="font-semibold text-base md:text-lg">{agent.profiles.full_name}</h3>
                             {getStatusBadge(agent.status)}
                           </div>
-                          <p className="text-sm text-muted-foreground">{agent.profiles.email}</p>
+                          <p className="text-xs md:text-sm text-muted-foreground break-all">{agent.profiles.email}</p>
                           {agent.business_name && (
-                            <p className="text-sm text-muted-foreground">{agent.business_name}</p>
+                            <p className="text-xs md:text-sm text-muted-foreground">{agent.business_name}</p>
                           )}
-                          <div className="flex gap-4 mt-2 text-sm">
+                          <div className="flex flex-wrap gap-3 md:gap-4 mt-2 text-xs md:text-sm">
                             <span><strong>{agent.referredPartnersCount}</strong> Partners</span>
                             <span><strong>{agent.totalBookings}</strong> Bookings</span>
                             <span className="text-green-600"><strong>KES {agent.totalEarnings.toLocaleString()}</strong> Earned</span>
                           </div>
                         </div>
-                        <div className="text-right space-y-2">
+                        <div className="text-left md:text-right space-y-2 md:space-y-3">
                           <div>
                             <p className="text-xs text-muted-foreground">Pending Payment</p>
-                            <p className="text-2xl font-bold text-amber-600">
+                            <p className="text-xl md:text-2xl font-bold text-amber-600">
                               KES {agent.pendingPayment.toLocaleString()}
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => viewAgentDetails(agent)}
+                              className="w-full sm:w-auto"
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               View Details
@@ -542,7 +543,7 @@ const AdminAgentPayments = () => {
                                 setShowPaymentDialog(true);
                               }}
                               disabled={agent.pendingPayment === 0}
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                             >
                               <Wallet className="h-4 w-4 mr-1" />
                               Record Payment
@@ -560,7 +561,7 @@ const AdminAgentPayments = () => {
 
         {/* Payment Dialog */}
         <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Record Payment to {selectedAgent?.profiles.full_name}</DialogTitle>
               <DialogDescription>
@@ -625,7 +626,7 @@ const AdminAgentPayments = () => {
 
         {/* Agent Details Dialog */}
         <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedAgent?.profiles.full_name} - Agent Details</DialogTitle>
             </DialogHeader>

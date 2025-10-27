@@ -100,3 +100,15 @@ All colors MUST be HSL.
     @apply font-heading;
   }
 }
+
+/* Hide scrollbars for horizontal scroll sections */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

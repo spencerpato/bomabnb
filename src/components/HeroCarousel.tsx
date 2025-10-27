@@ -47,7 +47,7 @@ export const HeroCarousel = () => {
   };
 
   return (
-    <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden rounded-2xl">
+    <div className="relative w-full h-[45vh] md:h-[70vh] overflow-hidden rounded-2xl">
       {heroSlides.map((slide, index) => (
         <div
           key={index}
@@ -61,20 +61,20 @@ export const HeroCarousel = () => {
           >
             <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
           </div>
-          <div className="relative h-full flex flex-col justify-center items-center px-4 md:px-16 text-white text-center">
-            <h2 className="font-heading font-bold text-3xl md:text-5xl lg:text-6xl mb-3 md:mb-4 animate-fade-in max-w-4xl">
+          <div className="relative h-full flex flex-col justify-center items-center px-3 md:px-16 text-white text-center">
+            <h2 className="font-heading font-bold text-2xl md:text-5xl lg:text-6xl mb-2 md:mb-4 animate-fade-in max-w-4xl">
               {slide.caption}
             </h2>
-            <p className="text-lg md:text-xl lg:text-2xl text-white/90 mb-6 md:mb-8 animate-fade-in animation-delay-200 max-w-2xl">
+            <p className="text-sm md:text-xl lg:text-2xl text-white/90 mb-4 md:mb-8 animate-fade-in animation-delay-200 max-w-2xl">
               {slide.subtitle}
             </p>
             
-            <div className="flex flex-col gap-3 md:gap-4 w-full max-w-lg backdrop-blur-sm bg-black/20 p-4 md:p-6 rounded-2xl shadow-2xl">
-              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+            <div className="flex flex-col gap-2 md:gap-4 w-full max-w-lg backdrop-blur-sm bg-black/20 p-3 md:p-6 rounded-xl md:rounded-2xl shadow-2xl">
+              <div className="flex flex-col sm:flex-row gap-2 md:gap-4">
                 <Button
                   data-testid="button-partner-with-us"
                   onClick={() => navigate("/partner-register")}
-                  className="h-12 md:h-14 text-base md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
+                  className="h-10 md:h-14 text-sm md:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
                   style={{ backgroundColor: "#D4A017", color: "white" }}
                 >
                   🏡 Partner With Us
@@ -83,7 +83,7 @@ export const HeroCarousel = () => {
                   data-testid="button-partner-login"
                   onClick={() => navigate("/auth")}
                   variant="outline"
-                  className="h-12 md:h-14 text-base md:text-lg font-semibold border-2 border-white text-white bg-transparent hover:bg-white/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
+                  className="h-10 md:h-14 text-sm md:text-lg font-semibold border-2 border-white text-white bg-transparent hover:bg-white/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 w-full sm:flex-1"
                 >
                   🔑 Partner Login
                 </Button>
@@ -92,7 +92,7 @@ export const HeroCarousel = () => {
                 data-testid="button-join-as-agent"
                 onClick={() => navigate("/partner-register?role=agent")}
                 variant="outline"
-                className="h-10 md:h-12 text-sm md:text-base font-medium border-2 border-amber-300 text-amber-300 bg-transparent hover:bg-amber-300/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 w-full group relative"
+                className="h-9 md:h-12 text-xs md:text-base font-medium border-2 border-amber-300 text-amber-300 bg-transparent hover:bg-amber-300/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 w-full group relative"
                 title="Earn commission by referring hosts to BomaBnB"
               >
                 <span className="flex items-center justify-center gap-2">

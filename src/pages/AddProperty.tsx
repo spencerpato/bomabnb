@@ -98,7 +98,23 @@ const AddProperty = () => {
     }
 
     if (!featuredImage) {
-      toast.error("Featured image is required");
+      toast.error("Please select a featured image");
+      return;
+    }
+
+    // Validate required numeric fields
+    if (!formData.maxGuestsPerUnit || parseInt(formData.maxGuestsPerUnit) < 1) {
+      toast.error("Please enter the maximum number of guests per unit");
+      return;
+    }
+
+    if (!formData.numberOfUnits || parseInt(formData.numberOfUnits) < 1) {
+      toast.error("Please enter the number of units");
+      return;
+    }
+
+    if (!formData.pricePerNight || parseFloat(formData.pricePerNight) <= 0) {
+      toast.error("Please enter a valid price per night");
       return;
     }
 
@@ -135,6 +151,17 @@ const AddProperty = () => {
         }
       }
 
+      // Log the values being saved
+      const maxGuestsValue = parseInt(formData.maxGuestsPerUnit);
+      const numberOfUnitsValue = parseInt(formData.numberOfUnits);
+      
+      console.log("Saving property with:", {
+        max_guests_per_unit: maxGuestsValue,
+        number_of_units: numberOfUnitsValue,
+        raw_max_guests: formData.maxGuestsPerUnit,
+        raw_units: formData.numberOfUnits
+      });
+
       const { data: propertyData, error: propertyError } = await supabase
         .from("properties")
         .insert({
@@ -144,8 +171,8 @@ const AddProperty = () => {
           location: formData.location,
           description: formData.description || null,
           price_per_night: parseFloat(formData.pricePerNight),
-          number_of_units: parseInt(formData.numberOfUnits),
-          max_guests_per_unit: parseInt(formData.maxGuestsPerUnit),
+          number_of_units: numberOfUnitsValue,
+          max_guests_per_unit: maxGuestsValue,
           amenities: formData.amenities,
           featured_image: featuredImageUrl,
           google_maps_link: formData.googleMapsLink || null,

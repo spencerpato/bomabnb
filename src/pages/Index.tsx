@@ -3,6 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { PropertyCard } from "@/components/PropertyCard";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { FeaturedCarousel } from "@/components/FeaturedCarousel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, DollarSign, Star, SlidersHorizontal } from "lucide-react";
@@ -17,11 +18,14 @@ interface Property {
   location: string;
   price_per_night: number;
   max_guests_per_unit: number;
+  number_of_units?: number;
   featured_image: string;
   amenities: string[];
   is_featured?: boolean;
   feature_start_date?: string;
   feature_end_date?: string;
+  last_featured_display?: string;
+  partner_id?: string;
 }
 
 const Index = () => {
@@ -41,6 +45,17 @@ const Index = () => {
   const fetchProperties = async () => {
     try {
       setIsLoading(true);
+      
+      // Fetch featured properties separately with rotation logic
+      const { data: featuredData, error: featuredError } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("is_active", true)
+        .eq("is_featured", true)
+        .order("last_featured_display", { ascending: true, nullsFirst: true })
+        .limit(5);
+
+      // Fetch all regular properties
       const { data, error } = await supabase
         .from("properties")
         .select("*")
@@ -48,6 +63,30 @@ const Index = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+      
+      // Log fetched properties to check guest numbers
+      console.log("Fetched properties:", data?.slice(0, 3).map(p => ({
+        name: p.property_name,
+        max_guests_per_unit: p.max_guests_per_unit,
+        number_of_units: p.number_of_units
+      })));
+      
+      // Log featured rotation
+      if (featuredData && featuredData.length > 0) {
+        console.log("Featured properties rotation:", featuredData.map(p => ({
+          name: p.property_name,
+          last_displayed: p.last_featured_display
+        })));
+        
+        // Update last_featured_display for displayed featured properties
+        const featuredIds = featuredData.map(p => p.id);
+        await supabase
+          .from("properties")
+          .update({ last_featured_display: new Date().toISOString() })
+          .in("id", featuredIds);
+        
+        console.log("Updated featured display timestamps for fair rotation");
+      }
       
       // Check and update expired featured properties (only if feature dates exist)
       const now = new Date().toISOString();
@@ -298,79 +337,142 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Properties Carousel Section */}
+      {/* Featured Properties - Auto-Rotating Carousel */}
       {(() => {
         const featuredProperties = filteredProperties.filter(p => p.is_featured);
         return featuredProperties.length > 0 ? (
-          <section className="py-16 px-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20">
-            <div className="container mx-auto">
-              <div className="text-center mb-12">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Star className="h-8 w-8 text-yellow-500 fill-current" />
-                  <h2 className="font-heading font-bold text-4xl text-foreground">
-                    Featured Properties
+          <section className="py-8 px-3 md:px-4 bg-gradient-to-r from-yellow-50/50 to-orange-50/50 dark:from-yellow-950/10 dark:to-orange-950/10">
+            <div className="container mx-auto max-w-7xl">
+              <div className="flex items-center justify-between mb-4 px-2">
+                <div className="flex items-center gap-2">
+                  <Star className="h-5 w-5 md:h-6 md:w-6 text-yellow-500 fill-current" />
+                  <h2 className="font-heading font-bold text-xl md:text-2xl text-foreground">
+                    Featured Properties 🌟
                   </h2>
-                  <Star className="h-8 w-8 text-yellow-500 fill-current" />
                 </div>
-                <p className="text-muted-foreground text-lg">
-                  Premium homestays with enhanced visibility
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  Rotates every 8 seconds
                 </p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              
+              <FeaturedCarousel autoRotateInterval={8000}>
                 {featuredProperties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onViewDetails={handleViewDetails}
-                  />
+                  <div key={property.id} className="flex-shrink-0 w-[260px] md:w-[300px]">
+                    <PropertyCard
+                      property={property}
+                      onViewDetails={handleViewDetails}
+                    />
+                  </div>
                 ))}
-              </div>
+              </FeaturedCarousel>
             </div>
           </section>
         ) : null;
       })()}
 
-      {/* All Properties Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="font-heading font-bold text-4xl mb-4 text-foreground">
-              All Properties
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Discover our complete collection of verified homestays
-            </p>
-          </div>
-
-          {isLoading ? (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground">Loading properties...</p>
-            </div>
-          ) : filteredProperties.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground">
-                {properties.length === 0 ? "No properties found. Check back soon!" : "No properties match your filters. Try adjusting your search."}
-              </p>
-              {properties.length > 0 && (
-                <Button onClick={clearFilters} className="mt-4">
-                  Clear Filters
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {filteredProperties.map((property) => (
-                <PropertyCard
-                  key={property.id}
-                  property={property}
-                  onViewDetails={handleViewDetails}
-                />
-              ))}
-            </div>
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="text-center py-20">
+          <p className="text-muted-foreground">Loading properties...</p>
+        </div>
+      ) : filteredProperties.length === 0 ? (
+        <div className="text-center py-20">
+          <p className="text-muted-foreground">
+            {properties.length === 0 ? "No properties found. Check back soon!" : "No properties match your filters. Try adjusting your search."}
+          </p>
+          {properties.length > 0 && (
+            <Button onClick={clearFilters} className="mt-4">
+              Clear Filters
+            </Button>
           )}
         </div>
-      </section>
+      ) : (
+        <>
+          {/* Single Unit Homes - Horizontal Scroll */}
+          {(() => {
+            const singleUnitProperties = filteredProperties.filter(p => {
+              const units = p.number_of_units || 1;
+              return units === 1;
+            });
+            return singleUnitProperties.length > 0 ? (
+              <section className="py-6 px-3 md:px-4">
+                <div className="container mx-auto max-w-7xl">
+                  <h2 className="font-heading font-bold text-xl md:text-2xl mb-4 px-2">🏠 Single Unit Homes</h2>
+                  
+                  <div className="overflow-x-auto scrollbar-hide pb-4">
+                    <div className="flex gap-4 px-2" style={{ minWidth: 'min-content' }}>
+                      {singleUnitProperties.slice(0, 12).map((property) => (
+                        <div key={property.id} className="flex-shrink-0 w-[260px] md:w-[300px]">
+                          <PropertyCard
+                            property={property}
+                            onViewDetails={handleViewDetails}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            ) : null;
+          })()}
+
+          {/* Two-Unit Homes - Horizontal Scroll */}
+          {(() => {
+            const twoUnitProperties = filteredProperties.filter(p => {
+              const units = p.number_of_units || 0;
+              return units === 2;
+            });
+            return twoUnitProperties.length > 0 ? (
+              <section className="py-6 px-3 md:px-4 bg-muted/20">
+                <div className="container mx-auto max-w-7xl">
+                  <h2 className="font-heading font-bold text-xl md:text-2xl mb-4 px-2">🏘️ Two-Unit Homes</h2>
+                  
+                  <div className="overflow-x-auto scrollbar-hide pb-4">
+                    <div className="flex gap-4 px-2" style={{ minWidth: 'min-content' }}>
+                      {twoUnitProperties.slice(0, 12).map((property) => (
+                        <div key={property.id} className="flex-shrink-0 w-[260px] md:w-[300px]">
+                          <PropertyCard
+                            property={property}
+                            onViewDetails={handleViewDetails}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            ) : null;
+          })()}
+
+          {/* Other Listings - Horizontal Scroll */}
+          {(() => {
+            const otherProperties = filteredProperties.filter(p => {
+              const units = p.number_of_units || 0;
+              return units >= 3 || units === 0;
+            });
+            return otherProperties.length > 0 ? (
+              <section className="py-6 px-3 md:px-4">
+                <div className="container mx-auto max-w-7xl">
+                  <h2 className="font-heading font-bold text-xl md:text-2xl mb-4 px-2">🌆 More Options</h2>
+                  
+                  <div className="overflow-x-auto scrollbar-hide pb-4">
+                    <div className="flex gap-4 px-2" style={{ minWidth: 'min-content' }}>
+                      {otherProperties.slice(0, 12).map((property) => (
+                        <div key={property.id} className="flex-shrink-0 w-[260px] md:w-[300px]">
+                          <PropertyCard
+                            property={property}
+                            onViewDetails={handleViewDetails}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            ) : null;
+          })()}
+        </>
+      )}
 
       {/* Why Choose BomaBnB Section - Responsive */}
       <section className="py-12 sm:py-16 px-2 sm:px-4 bg-muted/30">
